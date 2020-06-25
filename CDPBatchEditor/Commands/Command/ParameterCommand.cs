@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ParameterCommand.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="ParameterCommand.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Commands.Command
 {
@@ -35,36 +35,39 @@ namespace CDPBatchEditor.Commands.Command
     using CDP4Dal;
     using CDP4Dal.Operations;
 
-    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.CommandArguments.Interface;
+    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.Services.Interfaces;
 
     /// <summary>
-    /// Provides actions that apply to <see cref="Parameter"/>
+    /// Provides actions that apply to <see cref="Parameter" />
     /// </summary>
     public class ParameterCommand : IParameterCommand
     {
         /// <summary>
-        /// Gets the injected <see cref="ICommandArguments"/> instance
+        /// Gets the injected <see cref="ICommandArguments" /> instance
         /// </summary>
         private readonly ICommandArguments commandArguments;
 
         /// <summary>
-        /// Gets the injected <see cref="ISessionService"/> instance
-        /// </summary>
-        private readonly ISessionService sessionService;
-
-        /// <summary>
-        /// Gets the injected <see cref="IFilterService"/> instance
+        /// Gets the injected <see cref="IFilterService" /> instance
         /// </summary>
         private readonly IFilterService filterService;
 
         /// <summary>
-        /// Initialise a new <see cref="ParameterCommand"/>
+        /// Gets the injected <see cref="ISessionService" /> instance
         /// </summary>
-        /// <param name="commandArguments">the <see cref="ICommandArguments"/> arguments instance</param>
-        /// <param name="sessionService">the <see cref="ISessionService"/> providing the <see cref="ISession"/> for the application</param>
-        /// <param name="filterService">the <see cref="IFilterService"/></param>
+        private readonly ISessionService sessionService;
+
+        /// <summary>
+        /// Initialise a new <see cref="ParameterCommand" />
+        /// </summary>
+        /// <param name="commandArguments">the <see cref="ICommandArguments" /> arguments instance</param>
+        /// <param name="sessionService">
+        /// the <see cref="ISessionService" /> providing the <see cref="ISession" /> for the
+        /// application
+        /// </param>
+        /// <param name="filterService">the <see cref="IFilterService" /></param>
         public ParameterCommand(ICommandArguments commandArguments, ISessionService sessionService, IFilterService filterService)
         {
             this.commandArguments = commandArguments;
@@ -73,7 +76,8 @@ namespace CDPBatchEditor.Commands.Command
         }
 
         /// <summary>
-        /// Adds <see cref="Parameter"/>s to all <see cref="ElementDefinition"/>s of the given <see cref="CDP4Common.EngineeringModelData.Iteration"/>. 
+        /// Adds <see cref="Parameter" />s to all <see cref="ElementDefinition" />s of the given
+        /// <see cref="CDP4Common.EngineeringModelData.Iteration" />.
         /// </summary>
         public void Add()
         {
@@ -155,7 +159,7 @@ namespace CDPBatchEditor.Commands.Command
         }
 
         /// <summary>
-        /// Remove one or more parameter from the specified <see cref="ElementDefinition"/>
+        /// Remove one or more parameter from the specified <see cref="ElementDefinition" />
         /// </summary>
         public void Remove()
         {
@@ -231,9 +235,9 @@ namespace CDPBatchEditor.Commands.Command
         /// <summary>
         /// Move the parameter to the given parameter group.
         /// </summary>
-        /// <param name="parameter">The <see cref="Parameter"/> whose group will change</param>
-        /// <param name="group">The <see cref="ParameterGroup"/></param>
-        /// <param name="transaction">the <see cref="ThingTransaction"/> holding the changes to persist</param>
+        /// <param name="parameter">The <see cref="Parameter" /> whose group will change</param>
+        /// <param name="group">The <see cref="ParameterGroup" /></param>
+        /// <param name="transaction">the <see cref="ThingTransaction" /> holding the changes to persist</param>
         private void MoveParameterToGroup(ParameterBase parameter, ParameterGroup group, ThingTransaction transaction)
         {
             if (parameter != null && group != null && parameter.Group != group)
@@ -249,8 +253,8 @@ namespace CDPBatchEditor.Commands.Command
         /// </summary>
         /// <param name="elementDefinition">he element definition.</param>
         /// <param name="parameterGroupName">The parameter group name.</param>
-        /// <param name="transaction">the <see cref="ThingTransaction"/> holding the changes to persist</param>
-        /// <returns>The <see cref="ParameterGroup"/></returns>
+        /// <param name="transaction">the <see cref="ThingTransaction" /> holding the changes to persist</param>
+        /// <returns>The <see cref="ParameterGroup" /></returns>
         private ParameterGroup GetOrCreateParameterGroup(ElementDefinition elementDefinition, string parameterGroupName, ThingTransaction transaction)
         {
             var parameterGroup = elementDefinition.ParameterGroup.SingleOrDefault(pg => pg.Name == parameterGroupName);

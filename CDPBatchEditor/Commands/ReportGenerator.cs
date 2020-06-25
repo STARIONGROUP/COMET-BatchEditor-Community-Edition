@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ReportGenerator.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="ReportGenerator.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Commands
 {
@@ -39,7 +39,7 @@ namespace CDPBatchEditor.Commands
     using CDPBatchEditor.Services.Interfaces;
 
     /// <summary>
-    /// Write cvs reports on specified <see cref="EngineeringModel"/>
+    /// Write cvs reports on specified <see cref="EngineeringModel" />
     /// </summary>
     public class ReportGenerator : IReportGenerator
     {
@@ -48,29 +48,32 @@ namespace CDPBatchEditor.Commands
         /// </summary>
         private readonly IList<string> headers = new List<string>()
         {
-            nameof(EngineeringModel),  nameof(ElementDefinition),  $"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}", nameof(DomainOfExpertise),  
-            $"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}",  nameof(Category),  nameof(ParameterGroup), nameof(ReferenceDataLibrary), 
-            nameof(Parameter), nameof(Parameter.UserFriendlyShortName), nameof(ActualFiniteState.ShortName), nameof(Option.ShortName), 
-            nameof(ParameterValueSet.ActualValue), nameof(ParameterValueSet.Published), nameof(MeasurementScale), nameof(ParameterSwitchKind), 
+            nameof(EngineeringModel), nameof(ElementDefinition), $"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}", nameof(DomainOfExpertise),
+            $"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}", nameof(Category), nameof(ParameterGroup), nameof(ReferenceDataLibrary),
+            nameof(Parameter), nameof(Parameter.UserFriendlyShortName), nameof(ActualFiniteState.ShortName), nameof(Option.ShortName),
+            nameof(ParameterValueSet.ActualValue), nameof(ParameterValueSet.Published), nameof(MeasurementScale), nameof(ParameterSwitchKind),
             nameof(ParameterSwitchKind.COMPUTED), nameof(ParameterSwitchKind.MANUAL), nameof(ParameterSwitchKind.REFERENCE), nameof(ParameterValueSet.Formula)
         };
 
         /// <summary>
-        /// Gets the injected <see cref="ISessionService"/> instance
+        /// Gets the injected <see cref="ISessionService" /> instance
         /// </summary>
         private readonly ISessionService sessionService;
 
         /// <summary>
-        /// Initialise a new <see cref="ReportGenerator"/>
+        /// Initialise a new <see cref="ReportGenerator" />
         /// </summary>
-        /// <param name="sessionService">the <see cref="ISessionService"/> providing the <see cref="CDP4Dal.ISession"/> for the application</param>
+        /// <param name="sessionService">
+        /// the <see cref="ISessionService" /> providing the <see cref="CDP4Dal.ISession" /> for the
+        /// application
+        /// </param>
         public ReportGenerator(ISessionService sessionService)
         {
             this.sessionService = sessionService;
         }
 
         /// <summary>
-        /// Report all parameters on the given <see cref="Iteration"/>.
+        /// Report all parameters on the given <see cref="Iteration" />.
         /// </summary>
         public void ParametersToCsv()
         {
@@ -123,12 +126,12 @@ namespace CDPBatchEditor.Commands
         {
             var fields = new string[this.headers.Count];
             fields[this.headers.IndexOf(nameof(EngineeringModel))] = engineeringModelShortName;
-            fields[this.headers.IndexOf( nameof(ElementDefinition))] = elementDefinition.Name;
-            fields[this.headers.IndexOf( $"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
+            fields[this.headers.IndexOf(nameof(ElementDefinition))] = elementDefinition.Name;
+            fields[this.headers.IndexOf($"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
             fields[this.headers.IndexOf(nameof(DomainOfExpertise))] = elementDefinition.Owner.ShortName;
-            fields[this.headers.IndexOf( $"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = "";
-            fields[this.headers.IndexOf( nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
-            fields[this.headers.IndexOf( nameof(ParameterGroup))] = "";
+            fields[this.headers.IndexOf($"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = "";
+            fields[this.headers.IndexOf(nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
+            fields[this.headers.IndexOf(nameof(ParameterGroup))] = "";
             fields[this.headers.IndexOf(nameof(ReferenceDataLibrary))] = "";
             fields[this.headers.IndexOf(nameof(Parameter))] = "";
             fields[this.headers.IndexOf(nameof(Parameter.UserFriendlyShortName))] = "";
@@ -167,12 +170,12 @@ namespace CDPBatchEditor.Commands
             var fields = new string[this.headers.Count];
 
             fields[this.headers.IndexOf(nameof(EngineeringModel))] = engineeringModelShortName;
-            fields[this.headers.IndexOf( nameof(ElementDefinition))] = elementDefinition.Name;
-            fields[this.headers.IndexOf( $"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
-            fields[this.headers.IndexOf( nameof(DomainOfExpertise))] = parameterValueSet.Owner.ShortName;
-            fields[this.headers.IndexOf( $"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = "";
-            fields[this.headers.IndexOf( nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
-            fields[this.headers.IndexOf( nameof(ParameterGroup))] = parameterValueSet.GetContainerOfType<ParameterGroup>()?.UserFriendlyShortName;
+            fields[this.headers.IndexOf(nameof(ElementDefinition))] = elementDefinition.Name;
+            fields[this.headers.IndexOf($"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
+            fields[this.headers.IndexOf(nameof(DomainOfExpertise))] = parameterValueSet.Owner.ShortName;
+            fields[this.headers.IndexOf($"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = "";
+            fields[this.headers.IndexOf(nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
+            fields[this.headers.IndexOf(nameof(ParameterGroup))] = parameterValueSet.GetContainerOfType<ParameterGroup>()?.UserFriendlyShortName;
             fields[this.headers.IndexOf(nameof(ReferenceDataLibrary))] = string.Join(", ", containerParameter.ParameterType.RequiredRdls.Select(x => x.ShortName));
             fields[this.headers.IndexOf(nameof(Parameter))] = containerParameter.ParameterType.UserFriendlyShortName;
             fields[this.headers.IndexOf(nameof(Parameter.UserFriendlyShortName))] = containerParameter.ParameterType.ShortName;
@@ -201,12 +204,12 @@ namespace CDPBatchEditor.Commands
             var elementDefinition = subscriptionValueSet.GetContainerOfType<ElementDefinition>();
             var parameterOrOverrideBase = subscriptionValueSet.GetContainerOfType<ParameterOrOverrideBase>();
             fields[this.headers.IndexOf(nameof(EngineeringModel))] = engineeringModelShortName;
-            fields[this.headers.IndexOf( nameof(ElementDefinition))] = elementDefinition.Name;
-            fields[this.headers.IndexOf( $"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
-            fields[this.headers.IndexOf( nameof(DomainOfExpertise))] = parameterOrOverrideBase.Owner.ShortName;
-            fields[this.headers.IndexOf( $"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = subscriptionValueSet.Owner.ShortName;
-            fields[this.headers.IndexOf( nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
-            fields[this.headers.IndexOf( nameof(ParameterGroup))] = subscriptionValueSet.SubscribedValueSet.GetContainerOfType<ParameterGroup>()?.UserFriendlyShortName;
+            fields[this.headers.IndexOf(nameof(ElementDefinition))] = elementDefinition.Name;
+            fields[this.headers.IndexOf($"{nameof(ElementDefinition)}.{nameof(ElementDefinition.ShortName)}")] = elementDefinition.ShortName;
+            fields[this.headers.IndexOf(nameof(DomainOfExpertise))] = parameterOrOverrideBase.Owner.ShortName;
+            fields[this.headers.IndexOf($"{nameof(ParameterSubscription)}.{nameof(ParameterSubscription.Owner)}")] = subscriptionValueSet.Owner.ShortName;
+            fields[this.headers.IndexOf(nameof(Category))] = string.Join(", ", elementDefinition.Category.Select(cat => cat.ShortName).OrderBy(sn => sn));
+            fields[this.headers.IndexOf(nameof(ParameterGroup))] = subscriptionValueSet.SubscribedValueSet.GetContainerOfType<ParameterGroup>()?.UserFriendlyShortName;
             fields[this.headers.IndexOf(nameof(ReferenceDataLibrary))] = string.Join(", ", parameterOrOverrideBase.ParameterType.RequiredRdls.Select(x => x.ShortName));
             fields[this.headers.IndexOf(nameof(Parameter))] = parameterOrOverrideBase.ParameterType.Name;
             fields[this.headers.IndexOf(nameof(Parameter.UserFriendlyShortName))] = parameterOrOverrideBase.ParameterType.ShortName;

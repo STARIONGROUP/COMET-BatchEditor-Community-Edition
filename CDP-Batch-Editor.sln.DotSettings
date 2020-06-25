@@ -242,7 +242,30 @@
 	<s:Boolean x:Key="/Default/CodeStyle/CSharpUsing/QualifiedUsingAtNestedScope/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeStyle/EditorConfig/EnableStyleCopSupport/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeStyle/EditorConfig/ShowEditorConfigStatusBarIndicator/@EntryValue">True</s:Boolean>
-	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue"></s:String>
+	<s:String x:Key="/Default/CodeStyle/FileHeader/FileHeaderText/@EntryValue"> --------------------------------------------------------------------------------------------------------------------&#xD;
+ &lt;copyright file="$FILENAME$" company="RHEA System S.A."&gt;&#xD;
+    Copyright (c) 2015-$CURRENT_YEAR$ RHEA System S.A.&#xD;
+&#xD;
+    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené&#xD;
+&#xD;
+    This file is part of CDP4 Batch Editor.&#xD;
+    The CDP4 Batch Editor is a commandline application to perform batch operations on a&#xD;
+    ECSS-E-TM-10-25 Annex A and Annex C data source&#xD;
+&#xD;
+    The CDP4 Batch Editor is free software; you can redistribute it and/or&#xD;
+    modify it under the terms of the GNU Lesser General Public&#xD;
+    License as published by the Free Software Foundation; either&#xD;
+    version 3 of the License, or any later version.&#xD;
+&#xD;
+    The CDP4 Batch Editor is distributed in the hope that it will be useful,&#xD;
+    but WITHOUT ANY WARRANTY; without even the implied warranty of&#xD;
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the&#xD;
+    GNU Lesser General License version 3 for more details.&#xD;
+&#xD;
+    You should have received a copy of the GNU Lesser General License&#xD;
+    along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.&#xD;
+ &lt;/copyright&gt;&#xD;
+ --------------------------------------------------------------------------------------------------------------------</s:String>
 	<s:Boolean x:Key="/Default/CodeStyle/Generate/=Implementations/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/CodeStyle/Generate/=Implementations/Options/=Async/@EntryIndexedValue">False</s:String>
 	<s:String x:Key="/Default/CodeStyle/Generate/=Implementations/Options/=Mutable/@EntryIndexedValue">False</s:String>

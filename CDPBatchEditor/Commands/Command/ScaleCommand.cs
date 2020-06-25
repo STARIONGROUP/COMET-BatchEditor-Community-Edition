@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ScaleCommand.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="ScaleCommand.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Commands.Command
 {
@@ -36,45 +36,49 @@ namespace CDPBatchEditor.Commands.Command
 
     using CDP4Dal.Operations;
 
-    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.CommandArguments.Interface;
+    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.Services.Interfaces;
 
     /// <summary>
-    /// Defines an <see cref="ScaleCommand"/> that provides actions that are <see cref="CDP4Common.SiteDirectoryData.MeasurementScale"/> related
+    /// Defines an <see cref="ScaleCommand" /> that provides actions that are
+    /// <see cref="CDP4Common.SiteDirectoryData.MeasurementScale" /> related
     /// </summary>
     public class ScaleCommand : IScaleCommand
 
     {
         /// <summary>
-        /// Gets the injected <see cref="ICommandArguments"/> instance
+        /// Gets the injected <see cref="ICommandArguments" /> instance
         /// </summary>
         private readonly ICommandArguments commandArguments;
 
         /// <summary>
-        /// Gets the injected <see cref="ISessionService"/> instance
+        /// Gets the conversion factor to use to convert values from a <see cref="IValueSet" />
         /// </summary>
-        private readonly ISessionService sessionService;
+        private readonly Dictionary<string, double> conversionFactorsToMilimiters = new Dictionary<string, double>()
+        {
+            { "km", 1000000 }, { "m", 1000 }, { "dm", 100 }, { "cm", 10 }, { "mm", 1 }, { "μm", 0.001 }, { "nm", 0.000001 }
+        };
 
         /// <summary>
-        /// Gets the injected <see cref="IFilterService"/> instance
+        /// Gets the injected <see cref="IFilterService" /> instance
         /// </summary>
         private readonly IFilterService filterService;
 
         /// <summary>
-        /// Gets the conversion factor to use to convert values from a <see cref="IValueSet"/>
+        /// Gets the injected <see cref="ISessionService" /> instance
         /// </summary>
-        private readonly Dictionary<string, double> conversionFactorsToMilimiters = new Dictionary<string, double>()
-        {
-            { "km", 1000000 }, { "m", 1000 }, { "dm", 100}, { "cm", 10 }, { "mm", 1 }, { "μm", 0.001 }, { "nm", 0.000001 }
-        };
+        private readonly ISessionService sessionService;
 
         /// <summary>
-        /// Initialise a new <see cref="ScaleCommand"/>
+        /// Initialise a new <see cref="ScaleCommand" />
         /// </summary>
-        /// <param name="commandArguments">the <see cref="ICommandArguments"/> arguments instance</param>
-        /// <param name="sessionService">the <see cref="ISessionService"/> providing the <see cref="CDP4Dal.ISession"/> for the application</param>
-        /// <param name="filterService">the <see cref="IFilterService"/></param>
+        /// <param name="commandArguments">the <see cref="ICommandArguments" /> arguments instance</param>
+        /// <param name="sessionService">
+        /// the <see cref="ISessionService" /> providing the <see cref="CDP4Dal.ISession" /> for the
+        /// application
+        /// </param>
+        /// <param name="filterService">the <see cref="IFilterService" /></param>
         public ScaleCommand(ICommandArguments commandArguments, ISessionService sessionService, IFilterService filterService)
         {
             this.commandArguments = commandArguments;
@@ -130,7 +134,7 @@ namespace CDPBatchEditor.Commands.Command
                             $" {string.Join(", ", allPossibleScale.Select(x => x.ShortName).OrderBy(x => x))}");
                     }
 
-                    if (this.commandArguments.SelectedParameters.Contains(parameter.ParameterType.ShortName) 
+                    if (this.commandArguments.SelectedParameters.Contains(parameter.ParameterType.ShortName)
                         && allPossibleScale.Contains(measurementScale) && parameter.Scale != measurementScale)
                     {
                         var parameterClone = parameter.Clone(true);
@@ -159,7 +163,7 @@ namespace CDPBatchEditor.Commands.Command
                         .Where(this.filterService.IsParameterSpecifiedOrAny)
                         .SingleOrDefault(x => x.ParameterType.ShortName == dimensionParameterShortName);
 
-                    if (parameter?.ParameterType is QuantityKind quantityKind && quantityKind.AllPossibleScale.Contains(mm) 
+                    if (parameter?.ParameterType is QuantityKind quantityKind && quantityKind.AllPossibleScale.Contains(mm)
                                                                               && parameter.Scale.Iid != mm.Iid)
                     {
                         var clone = parameter.Clone(true);
@@ -178,7 +182,7 @@ namespace CDPBatchEditor.Commands.Command
         /// <param name="parameterClone"> The parameter clone </param>
         /// <param name="oldScale"> The old scale. </param>
         /// <param name="newScale"> The new scale. </param>
-        /// <param name="conversionFactor">the conversion factor in <see cref="double"/></param>
+        /// <param name="conversionFactor">the conversion factor in <see cref="double" /></param>
         private void ConvertParameterValueAndScale(string elementDefinitionShortName, Parameter parameterClone, string oldScale, MeasurementScale newScale, double conversionFactor)
         {
             var ownerShortName = parameterClone.Owner.ShortName;
@@ -249,7 +253,7 @@ namespace CDPBatchEditor.Commands.Command
         }
 
         /// <summary>
-        /// Prints informations about the <see cref="IValueSet"/> being updated
+        /// Prints informations about the <see cref="IValueSet" /> being updated
         /// </summary>
         /// <param name="elementDefinitionShortName">The element definition.</param>
         /// <param name="parameterShortName">The parameter short name.</param>
@@ -264,14 +268,17 @@ namespace CDPBatchEditor.Commands.Command
         {
             var ownership = isSubscription ? "subscribed by" : "owned by";
             var messageStart = $"In {elementDefinitionShortName} parameter \"{parameterShortName}\" ({ownership} {ownerShortName}) value {oldValue} {oldScaleShortName}";
-            var message = hasConversionSucceed ? $"{messageStart} is converted to {newValue} {newScale.ShortName}" : $"{messageStart} cannot be converted"; 
+            var message = hasConversionSucceed ? $"{messageStart} is converted to {newValue} {newScale.ShortName}" : $"{messageStart} cannot be converted";
             Console.WriteLine(message);
         }
 
         /// <summary>
         /// Convert a numeric value from old scale to new scale.
         /// </summary>
-        /// <param name="oldValue"> The old value. If the old value is a blank string or null, it is reset to the default value "-". </param>
+        /// <param name="oldValue">
+        /// The old value. If the old value is a blank string or null, it is reset to the default value
+        /// "-".
+        /// </param>
         /// <param name="conversionFactor"> The conversion factor. </param>
         /// <param name="errorCount"> Error count, that is incremented for every conversion error detected. </param>
         /// <returns> The string value converted to the new scale. </returns>

@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SubscriptionCommand.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="SubscriptionCommand.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Commands.Command
 {
@@ -32,36 +32,40 @@ namespace CDPBatchEditor.Commands.Command
 
     using CDP4Dal.Operations;
 
-    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.CommandArguments.Interface;
+    using CDPBatchEditor.Commands.Command.Interface;
     using CDPBatchEditor.Services.Interfaces;
 
     /// <summary>
-    /// Defines an <see cref="SubscriptionCommand"/> that provides actions that are <see cref="CDP4Common.EngineeringModelData.ParameterSubscription"/> related
+    /// Defines an <see cref="SubscriptionCommand" /> that provides actions that are
+    /// <see cref="CDP4Common.EngineeringModelData.ParameterSubscription" /> related
     /// </summary>
     public class SubscriptionCommand : ISubscriptionCommand
     {
         /// <summary>
-        /// Gets the injected <see cref="ICommandArguments"/> instance
+        /// Gets the injected <see cref="ICommandArguments" /> instance
         /// </summary>
         private readonly ICommandArguments commandArguments;
 
         /// <summary>
-        /// Gets the injected <see cref="ISessionService"/> instance
-        /// </summary>
-        private readonly ISessionService sessionService;
-
-        /// <summary>
-        /// Gets the injected <see cref="IFilterService"/> instance
+        /// Gets the injected <see cref="IFilterService" /> instance
         /// </summary>
         private readonly IFilterService filterService;
 
         /// <summary>
-        /// Initialise a new <see cref="SubscriptionCommand"/>
+        /// Gets the injected <see cref="ISessionService" /> instance
         /// </summary>
-        /// <param name="commandArguments">the <see cref="ICommandArguments"/> arguments instance</param>
-        /// <param name="sessionService">the <see cref="ISessionService"/> providing the <see cref="CDP4Dal.ISession"/> for the application</param>
-        /// <param name="filterService">the <see cref="IFilterService"/></param>
+        private readonly ISessionService sessionService;
+
+        /// <summary>
+        /// Initialise a new <see cref="SubscriptionCommand" />
+        /// </summary>
+        /// <param name="commandArguments">the <see cref="ICommandArguments" /> arguments instance</param>
+        /// <param name="sessionService">
+        /// the <see cref="ISessionService" /> providing the <see cref="CDP4Dal.ISession" /> for the
+        /// application
+        /// </param>
+        /// <param name="filterService">the <see cref="IFilterService" /></param>
         public SubscriptionCommand(ICommandArguments commandArguments, ISessionService sessionService, IFilterService filterService)
         {
             this.commandArguments = commandArguments;
@@ -108,7 +112,7 @@ namespace CDPBatchEditor.Commands.Command
                     this.sessionService.Transactions.Add(new ThingTransaction(TransactionContextResolver.ResolveContext(parameterClone), parameterClone));
 
                     var parameterSubscription = new ParameterSubscription(Guid.NewGuid(), this.sessionService.Cache, this.commandArguments.ServerUri)
-                    { Owner = subscriber };
+                        { Owner = subscriber };
 
                     this.sessionService.Transactions.Last().Create(parameterSubscription, parameterClone);
 
@@ -122,13 +126,13 @@ namespace CDPBatchEditor.Commands.Command
                     {
                         // Take subscription on this parameter override if no subscription is taken already
                         if (this.commandArguments.SelectedParameters.Contains(parameterOverride.ParameterType.ShortName) && parameterOverride.Owner.Iid != subscriber.Iid
-                            && parameterOverride.ParameterSubscription.All(parameterSubscription => parameterSubscription.Owner != subscriber))
+                                                                                                                         && parameterOverride.ParameterSubscription.All(parameterSubscription => parameterSubscription.Owner != subscriber))
                         {
                             var parameterOverrideClone = parameterOverride.Clone(true);
                             this.sessionService.Transactions.Add(new ThingTransaction(TransactionContextResolver.ResolveContext(parameterOverrideClone), parameterOverrideClone));
 
                             var parameterSubscription = new ParameterSubscription(Guid.NewGuid(), this.sessionService.Cache, this.commandArguments.ServerUri)
-                            { Owner = subscriber, Container = parameterOverrideClone };
+                                { Owner = subscriber, Container = parameterOverrideClone };
 
                             this.sessionService.Transactions.Last().Create(parameterSubscription, parameterOverrideClone);
                             Console.WriteLine($"Parameter Override Subscription taken on {parameterSubscription.UserFriendlyShortName}");
@@ -139,12 +143,13 @@ namespace CDPBatchEditor.Commands.Command
         }
 
         /// <summary>
-        /// Set the switch on all value sets of the <see cref="ParameterSubscription"/>s of the given subscriber to the given switch value.
+        /// Set the switch on all value sets of the <see cref="ParameterSubscription" />s of the given subscriber to the given
+        /// switch value.
         /// </summary>
         public void SetParameterSubscriptionsSwitch()
         {
             var subscriber = this.sessionService.SiteDirectory.Domain.SingleOrDefault(domainOfExpertise => domainOfExpertise.ShortName == this.commandArguments.DomainOfExpertise);
-            
+
             if (subscriber == null)
             {
                 Console.WriteLine($"Unknown subscriber domain of expertise: \"{this.commandArguments.DomainOfExpertise}\". Subscribe parameters skipped.");
@@ -156,7 +161,7 @@ namespace CDPBatchEditor.Commands.Command
                 Console.WriteLine(
                     "Parameter switch kind not provided: use \"-parameter-switch\" with one of the following values: " +
                     "\"COMPUTED\" | \"MANUAL\" | \"REFERENCE\" . Subscribe parameters skipped.");
-                
+
                 return;
             }
 
@@ -187,7 +192,7 @@ namespace CDPBatchEditor.Commands.Command
                             .SelectMany(p => p.ValueSet))
                         {
                             this.UpdateValueSwitch(parameterSubscriptionValueSet);
-                            
+
                             changeCount++;
                         }
                     }
