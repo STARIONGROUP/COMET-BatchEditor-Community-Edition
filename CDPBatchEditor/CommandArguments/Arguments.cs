@@ -188,7 +188,7 @@ namespace CDPBatchEditor.CommandArguments
         /// Gets or sets the name of the parameter group into which new parameters will be added.
         /// </summary>
         [Option(
-            "parameter-groupre",
+            "parameter-group",
             Required = false,
             HelpText = "Name of a parameter group into which new parameters will be added. "
                        + "If it does not exist, the parameter group will be created. " + "Use in conjunction with --action=add-parameters.")]
