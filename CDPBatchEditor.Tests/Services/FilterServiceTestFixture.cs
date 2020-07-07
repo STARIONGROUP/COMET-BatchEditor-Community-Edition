@@ -52,6 +52,7 @@ namespace CDPBatchEditor.Tests.Services
         private Iteration iteration;
         private DomainOfExpertise domain;
         private ElementDefinition elementDefinition;
+        private ElementDefinition elementDefinition2;
         private DomainOfExpertise domain3;
         private DomainOfExpertise domain2;
         private Parameter parameter2;
@@ -77,11 +78,15 @@ namespace CDPBatchEditor.Tests.Services
             this.siteDirectory.Domain.Add(this.domain3);
 
             this.elementDefinition = new ElementDefinition(Guid.NewGuid(), this.assembler.Cache, this.uri) { ShortName = "e", Owner = this.domain };
+            this.elementDefinition2 = new ElementDefinition(Guid.NewGuid(), this.assembler.Cache, this.uri) { ShortName = "e2", Owner = this.domain };
+
+            this.elementDefinition.ContainedElement.Add(new ElementUsage(Guid.NewGuid(), this.assembler.Cache, this.uri) { ShortName = "e2u", Owner = this.domain, ElementDefinition = this.elementDefinition2});
             var parameterType = new DateTimeParameterType(Guid.NewGuid(), this.assembler.Cache, this.uri) { ShortName = "t" };
             var parameterType2 = new SimpleQuantityKind(Guid.NewGuid(), this.assembler.Cache, this.uri) { ShortName = "o" };
             this.parameter = new Parameter(Guid.NewGuid(), this.assembler.Cache, this.uri) { ParameterType = parameterType };
             this.parameter2 = new Parameter(Guid.NewGuid(), this.assembler.Cache, this.uri) { ParameterType = parameterType };
             this.iteration.Element.Add(this.elementDefinition);
+            this.iteration.Element.Add(this.elementDefinition2);
 
             this.commandArguments.Setup(x => x.ElementDefinition).Returns(this.elementDefinition.ShortName);
             this.commandArguments.Setup(x => x.DomainOfExpertise).Returns(this.domain.ShortName);

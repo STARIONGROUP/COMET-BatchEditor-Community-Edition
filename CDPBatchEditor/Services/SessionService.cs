@@ -28,6 +28,7 @@ namespace CDPBatchEditor.Services
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using CDP4Common.CommonData;
@@ -80,6 +81,7 @@ namespace CDPBatchEditor.Services
         /// </summary>
         /// <param name="commandArguments">the <see cref="ICommandArguments" /> arguments instance.</param>
         /// <param name="filterService">the <see cref="IFilterService" /> that provides filters and filters helpers.</param>
+        [ExcludeFromCodeCoverage]
         public SessionService(ICommandArguments commandArguments, IFilterService filterService)
         {
             this.commandArguments = commandArguments;

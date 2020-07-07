@@ -73,7 +73,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             Assert.IsTrue(this.Parameter4.ParameterSubscription.All(
                 s => s.ValueSet.All(
-                    v => v.ValueSwitch == ParameterSwitchKind.COMPUTED)));
+                    v => v.ValueSwitch == ParameterSwitchKind.MANUAL)));
 
             this.subscriptionCommand.SetParameterSubscriptionsSwitch();
 

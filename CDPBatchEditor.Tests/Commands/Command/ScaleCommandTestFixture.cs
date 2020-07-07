@@ -83,11 +83,14 @@ namespace CDPBatchEditor.Tests.Commands.Command
             this.scaleCommand.StandardizeDimensionsInMillimetre();
 
             Assert.IsTrue(
-                this.Transactions.All(
-                    t => t.UpdatedThing.All(
+                this.Transactions.Any(
+                    t => t.UpdatedThing.Any(
                         a => a.Value is Parameter p
                              && p.Scale == this.MillimeterScale
-                             && p.ParameterType.ShortName == parameterShortName)));
+                             && p.ParameterType.ShortName == parameterShortName) || t.UpdatedThing.Any(
+                             a => a.Value is ParameterSubscription p
+                                  && p.Scale == this.MillimeterScale
+                                  && p.ParameterType.ShortName == parameterShortName)));
         }
     }
 }

@@ -103,6 +103,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
         public Assembler Assembler { get; set; }
 
         public ParameterSubscription ParameterSubscription { get; set; }
+        public ParameterSubscription ParameterSubscription1 { get; set; }
 
         public ElementDefinition TestElementDefinition { get; set; }
 
@@ -409,6 +410,15 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
         private void SetupParameter()
         {
+            this.ValueSet = new ParameterValueSet
+            {
+                ValueSwitch = ParameterSwitchKind.REFERENCE,
+                Reference = new ValueArray<string>(new List<string>() { "5555" }),
+                Manual = new ValueArray<string>(new List<string>() { "-" }),
+                Computed = new ValueArray<string>(new List<string>() { "-" }),
+                Published = new ValueArray<string>(new List<string>() { "-" })
+            };
+
             this.ParameterSubscription = new ParameterSubscription(Guid.NewGuid(), this.Assembler.Cache, this.uri)
             {
                 Owner = this.Domain2, ValueSet =
@@ -416,6 +426,20 @@ namespace CDPBatchEditor.Tests.Commands.Command
                     new ParameterSubscriptionValueSet(Guid.NewGuid(), this.Assembler.Cache, this.uri)
                     {
                         SubscribedValueSet = this.ValueSet
+                    }
+                }
+            };
+
+            this.ParameterSubscription1 = new ParameterSubscription(Guid.NewGuid(), this.Assembler.Cache, this.uri)
+            {
+                Owner = this.Domain2,
+                ValueSet =
+                {
+                    new ParameterSubscriptionValueSet(Guid.NewGuid(), this.Assembler.Cache, this.uri)
+                    {
+                        SubscribedValueSet = this.ValueSet,
+                        ValueSwitch = ParameterSwitchKind.MANUAL,
+                        Manual = new ValueArray<string>(new List<string>() { "-" })
                     }
                 }
             };
@@ -450,14 +474,6 @@ namespace CDPBatchEditor.Tests.Commands.Command
                 Owner = this.TestElementDefinition.Owner
             };
 
-            this.ValueSet = new ParameterValueSet
-            {
-                ValueSwitch = ParameterSwitchKind.REFERENCE,
-                Reference = new ValueArray<string>(new List<string>() { "5555" }),
-                Manual = new ValueArray<string>(new List<string>() { "-" }),
-                Computed = new ValueArray<string>(new List<string>() { "-" })
-            };
-
             this.Parameter3 = new Parameter(Guid.NewGuid(), this.Assembler.Cache, this.uri)
             {
                 Container = this.TestElementDefinition,
@@ -476,7 +492,8 @@ namespace CDPBatchEditor.Tests.Commands.Command
                 ParameterType = this.parameterType4,
                 Owner = this.TestElementDefinition.Owner,
                 Scale = this.MeterScale,
-                ValueSet = { this.ValueSet }
+                ValueSet = { this.ValueSet },
+                ParameterSubscription = { this.ParameterSubscription1 }
             };
 
             this.Parameter5 = new Parameter(Guid.NewGuid(), this.Assembler.Cache, this.uri)

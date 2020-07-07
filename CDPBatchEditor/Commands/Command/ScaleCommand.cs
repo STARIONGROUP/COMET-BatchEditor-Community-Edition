@@ -241,6 +241,8 @@ namespace CDPBatchEditor.Commands.Command
                     thingClone.Reference[0] = this.ConvertNumericValue(oldValue, conversionFactor, ref errorCount);
                     this.OutputReport(elementDefinitionShortName, parameterClone.UserFriendlyShortName, oldScale, newScale, subscriber, oldValue, thingClone.Reference[0], errorCount == 0, true);
                 }
+
+                this.sessionService.Transactions.Last().CreateOrUpdate(thingClone);
             }
 
             if (errorCount == 0)
