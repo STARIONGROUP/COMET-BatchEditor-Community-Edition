@@ -106,6 +106,7 @@ namespace CDPBatchEditor.Services
         /// <summary>
         /// Gets the cache of the current <see cref="ISession" />
         /// </summary>
+        [ExcludeFromCodeCoverage]
         public ConcurrentDictionary<CacheKey, Lazy<Thing>> Cache
         {
             get { return this.Session.Assembler.Cache; }
@@ -160,6 +161,7 @@ namespace CDPBatchEditor.Services
         /// A <see cref="T:CDP4Common.SiteDirectoryData.DomainOfExpertise" /> if has been selected for the
         /// <see cref="T:CDP4Common.EngineeringModelData.Iteration" />, null otherwise.
         /// </returns>
+        [ExcludeFromCodeCoverage]
         public DomainOfExpertise QuerySelectedDomainOfExpertise()
         {
             return this.Session.QuerySelectedDomainOfExpertise(this.Iteration);

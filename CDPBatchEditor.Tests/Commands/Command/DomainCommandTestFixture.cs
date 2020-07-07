@@ -88,11 +88,11 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             Assert.IsEmpty(this.Transactions.SelectMany(x => x.UpdatedThing));
 
-            var action = "--action ChangeDomain -m TEST --parameters testParameter,testParameter2 --element-definition testElementDefinition --domain testDomain --to-domain testDomain2";
+            var action = "--action ChangeDomain -m TEST --parameters testParameter,testParameter2,P_mean  --element-definition testElementDefinition --domain testDomain --to-domain testDomain2";
             this.BuildAction(action);
             this.domainCommand.ChangeDomain();
 
-            Assert.AreEqual(7, this.Transactions.Count);
+            Assert.AreEqual(10, this.Transactions.Count);
 
             Assert.IsNotEmpty(this.Transactions.SelectMany(x => x.UpdatedThing));
             Assert.IsEmpty(this.Transactions.SelectMany(x => x.AddedThing));
@@ -108,6 +108,32 @@ namespace CDPBatchEditor.Tests.Commands.Command
             }
 
             Assert.IsTrue(updatedElementDefinitions.Single().ShortName == this.TestElementDefinition.ShortName);
+        }
+
+        [Test]
+        public void VerifyChangeDomainFails()
+        {
+            Assert.AreEqual(0, this.Transactions.Count);
+
+            Assert.IsEmpty(this.Transactions.SelectMany(x => x.UpdatedThing));
+
+            var action = "--action ChangeDomain -m TEST --parameters testParameter,testParameter2 --element-definition testElementDefinition --domain bla --to-domain bla2";
+            this.BuildAction(action);
+            this.domainCommand.ChangeDomain();
+
+            Assert.AreEqual(0, this.Transactions.Count);
+
+            action = "--action ChangeDomain -m TEST --parameters testParameter,testParameter2 --element-definition testElementDefinition --domain testDomain --to-domain testDomain";
+            this.BuildAction(action);
+            this.domainCommand.ChangeDomain();
+
+            Assert.AreEqual(0, this.Transactions.Count);
+
+            action = "--action ChangeDomain -m TEST --parameters testParameter,testParameter2 --element-definition testElementDefinition --domain testDomain --to-domain bla2";
+            this.BuildAction(action);
+            this.domainCommand.ChangeDomain();
+
+            Assert.AreEqual(0, this.Transactions.Count);
         }
 
         [Test]

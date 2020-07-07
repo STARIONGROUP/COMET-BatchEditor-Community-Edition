@@ -79,6 +79,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
         public Parameter Parameter2 { get; private set; }
 
         public Parameter Parameter3 { get; private set; }
+        public Parameter Parameter3s { get; private set; }
 
         public Parameter Parameter4 { get; private set; }
 
@@ -104,6 +105,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
         public ParameterSubscription ParameterSubscription { get; set; }
         public ParameterSubscription ParameterSubscription1 { get; set; }
+        public ParameterSubscription ParameterSubscription2 { get; set; }
 
         public ElementDefinition TestElementDefinition { get; set; }
 
@@ -403,7 +405,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             var parameterOverride = new ParameterOverride(Guid.NewGuid(), this.Assembler.Cache, this.uri) { Owner = this.Domain, Parameter = this.Parameter };
 
-            var elementUsage = new ElementUsage(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ElementDefinition = this.TestElementDefinition };
+            var elementUsage = new ElementUsage(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ElementDefinition = this.TestElementDefinition, Owner = this.Domain};
             elementUsage.ParameterOverride.Add(parameterOverride);
             this.TestElementDefinition.ContainedElement.Add(elementUsage);
         }
@@ -421,7 +423,8 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             this.ParameterSubscription = new ParameterSubscription(Guid.NewGuid(), this.Assembler.Cache, this.uri)
             {
-                Owner = this.Domain2, ValueSet =
+                Owner = this.Domain,
+                ValueSet =
                 {
                     new ParameterSubscriptionValueSet(Guid.NewGuid(), this.Assembler.Cache, this.uri)
                     {
@@ -433,6 +436,20 @@ namespace CDPBatchEditor.Tests.Commands.Command
             this.ParameterSubscription1 = new ParameterSubscription(Guid.NewGuid(), this.Assembler.Cache, this.uri)
             {
                 Owner = this.Domain2,
+                ValueSet =
+                {
+                    new ParameterSubscriptionValueSet(Guid.NewGuid(), this.Assembler.Cache, this.uri)
+                    {
+                        SubscribedValueSet = this.ValueSet,
+                        ValueSwitch = ParameterSwitchKind.MANUAL,
+                        Manual = new ValueArray<string>(new List<string>() { "-" })
+                    }
+                }
+            };
+
+            this.ParameterSubscription2 = new ParameterSubscription(Guid.NewGuid(), this.Assembler.Cache, this.uri)
+            {
+                Owner = this.Domain,
                 ValueSet =
                 {
                     new ParameterSubscriptionValueSet(Guid.NewGuid(), this.Assembler.Cache, this.uri)
@@ -478,12 +495,21 @@ namespace CDPBatchEditor.Tests.Commands.Command
             {
                 Container = this.TestElementDefinition,
                 ParameterType = this.parameterType3,
-                Owner = this.TestElementDefinition.Owner,
+                Owner = this.Domain2,
                 IsOptionDependent = true,
                 StateDependence = this.ActualPossibleFiniteStateList,
                 Scale = this.MeterScale,
                 ValueSet = { this.ValueSet },
                 ParameterSubscription = { this.ParameterSubscription }
+            };
+
+            this.Parameter3s = new Parameter(Guid.NewGuid(), this.Assembler.Cache, this.uri)
+            {
+                Container = this.TestElementDefinition,
+                ParameterType = this.parameterType5,
+                Owner = this.Domain2,
+                ValueSet = { this.ValueSet },
+                ParameterSubscription = { this.ParameterSubscription2 }
             };
 
             this.Parameter4 = new Parameter(Guid.NewGuid(), this.Assembler.Cache, this.uri)

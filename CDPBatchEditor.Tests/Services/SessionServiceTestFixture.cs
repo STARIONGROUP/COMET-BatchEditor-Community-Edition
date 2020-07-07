@@ -121,17 +121,7 @@ namespace CDPBatchEditor.Tests.Services
         }
 
         [Test]
-        public void VerifyClose()
-        {
-            this.sessionService.Close();
-            this.session.Setup(x => x.RetrieveSiteDirectory());
-            Assert.IsFalse(this.sessionService.IsSessionOpen());
-            this.sessionService.Close();
-            this.session.Verify(x => x.Close(), Times.Once);
-        }
-
-        [Test]
-        public void VerifySave()
+        public void VerifySaveClose()
         {
             this.sessionService.Transactions.Add(this.CreateDummyTransactions());
             this.sessionService.Transactions.Add(this.CreateDummyTransactions());
@@ -139,10 +129,14 @@ namespace CDPBatchEditor.Tests.Services
 
             Assert.AreEqual(3, this.sessionService.Transactions.Count);
 
-            this.sessionService.Save();
+            this.sessionService.CloseAndSave();
             this.sessionService.Transactions.Clear();
             this.sessionService.Save();
             this.session.Verify(x => x.Write(It.IsAny<OperationContainer>()), Times.Exactly(3));
+
+            this.session.Setup(x => x.RetrieveSiteDirectory());
+            Assert.IsFalse(this.sessionService.IsSessionOpen());
+            this.sessionService.Close();
         }
 
         [Test]
