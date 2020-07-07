@@ -6,6 +6,17 @@ The Concurrent Design Platform 4 (CDP4) BatchEditor Community Editition (CE) is 
 
 Find example usages of all commands in [CommandExamples.md](CommandExamples.md).
 
+## Build status
+
+AppVeyor is used to build and test the C# CDP4-BatchEditor
+
+Branch | Build Status
+------- | :------------
+Master |  [![Build status](https://ci.appveyor.com/api/projects/status/1iv7brk6t7k3aeop/branch/master?svg=true)](https://ci.appveyor.com/project/rheagroup/cdp4-batcheditor-community-edition/branch/master)
+Development |  [![Build status](https://ci.appveyor.com/api/projects/status/1iv7brk6t7k3aeop/branch/development?svg=true)](https://ci.appveyor.com/project/rheagroup/cdp4-batcheditor-community-edition/branch/development)
+
+[![Build history](https://buildstats.info/appveyor/chart/rheagroup/cdp4-batcheditor-community-edition)](https://ci.appveyor.com/project/rheagroup/cdp4-batcheditor-community-edition)
+
 ## Concurrent Design
 
 The Concurrent Design method is an approach to design activities in which all design disciplines and stakeholders are brought together to create an integrated design in a collaborative way of working.
