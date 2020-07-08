@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BaseCommandTestFixture.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="BaseCommandTestFixture.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Tests.Commands.Command
 {
@@ -51,6 +51,25 @@ namespace CDPBatchEditor.Tests.Commands.Command
     {
         private const string BaseUri = "http://test.com";
         private readonly string baseArguments = $" -s {BaseUri} -u admin -p pass ";
+        private ElementDefinition elementDefinition2;
+        private ElementDefinition elementDefinition3;
+        private ElementDefinition elementDefinition4;
+        private EngineeringModelSetup engineeringModelSetup;
+        private EngineeringModel model;
+        private ModelReferenceDataLibrary modelReferenceDataLibrary;
+        private TextParameterType parameterType;
+        private TextParameterType parameterType2;
+        private SimpleQuantityKind parameterType3;
+        private SimpleQuantityKind parameterType4;
+        private SimpleQuantityKind parameterType5;
+        private SimpleQuantityKind parameterType6;
+        private SimpleQuantityKind parameterType7;
+        private Participant participant;
+        private Person person;
+        private SiteDirectory siteDirectory;
+        private SiteReferenceDataLibrary siteReferenceDataLibrary;
+
+        private Uri uri;
 
         internal ICommandArguments CommandArguments { get; private set; }
 
@@ -79,6 +98,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
         public Parameter Parameter2 { get; private set; }
 
         public Parameter Parameter3 { get; private set; }
+
         public Parameter Parameter3s { get; private set; }
 
         public Parameter Parameter4 { get; private set; }
@@ -104,29 +124,12 @@ namespace CDPBatchEditor.Tests.Commands.Command
         public Assembler Assembler { get; set; }
 
         public ParameterSubscription ParameterSubscription { get; set; }
+
         public ParameterSubscription ParameterSubscription1 { get; set; }
+
         public ParameterSubscription ParameterSubscription2 { get; set; }
 
         public ElementDefinition TestElementDefinition { get; set; }
-
-        private Uri uri;
-        private SiteDirectory siteDirectory;
-        private TextParameterType parameterType;
-        private TextParameterType parameterType2;
-        private SimpleQuantityKind parameterType3;
-        private EngineeringModel model;
-        private EngineeringModelSetup engineeringModelSetup;
-        private SiteReferenceDataLibrary siteReferenceDataLibrary;
-        private ModelReferenceDataLibrary modelReferenceDataLibrary;
-        private Person person;
-        private Participant participant;
-        private ElementDefinition elementDefinition3;
-        private ElementDefinition elementDefinition2;
-        private SimpleQuantityKind parameterType4;
-        private ElementDefinition elementDefinition4;
-        private SimpleQuantityKind parameterType7;
-        private SimpleQuantityKind parameterType5;
-        private SimpleQuantityKind parameterType6;
 
         [SetUp]
         public void Setup()
@@ -405,7 +408,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             var parameterOverride = new ParameterOverride(Guid.NewGuid(), this.Assembler.Cache, this.uri) { Owner = this.Domain, Parameter = this.Parameter };
 
-            var elementUsage = new ElementUsage(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ElementDefinition = this.TestElementDefinition, Owner = this.Domain};
+            var elementUsage = new ElementUsage(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ElementDefinition = this.TestElementDefinition, Owner = this.Domain };
             elementUsage.ParameterOverride.Add(parameterOverride);
             this.TestElementDefinition.ContainedElement.Add(elementUsage);
         }

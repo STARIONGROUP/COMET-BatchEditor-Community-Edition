@@ -1,27 +1,27 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SessionServiceTestFixture.cs" company="RHEA System S.A.">
-//    Copyright (c) 2015-2020 RHEA System S.A.
-//
-//    Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
-//
-//    This file is part of CDP4 Batch Editor. 
-//    The CDP4 Batch Editor is a commandline application to perform batch operations on a 
-//    ECSS-E-TM-10-25 Annex A and Annex C data source
-//
-//    The CDP4 Batch Editor is free software; you can redistribute it and/or
-//    modify it under the terms of the GNU Lesser General Public
-//    License as published by the Free Software Foundation; either
-//    version 3 of the License, or any later version.
-//
-//    The CDP4 Batch Editor is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//    GNU Affero General License for more details.
-//
-//    You should have received a copy of the GNU Affero General License
-//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
+﻿//  --------------------------------------------------------------------------------------------------------------------
+//  <copyright file="SessionServiceTestFixture.cs" company="RHEA System S.A.">
+//     Copyright (c) 2015-2020 RHEA System S.A.
+// 
+//     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Kamil Wojnowski, Sam Gerené
+// 
+//     This file is part of CDP4 Batch Editor.
+//     The CDP4 Batch Editor is a commandline application to perform batch operations on a
+//     ECSS-E-TM-10-25 Annex A and Annex C data source
+// 
+//     The CDP4 Batch Editor is free software; you can redistribute it and/or
+//     modify it under the terms of the GNU Lesser General Public
+//     License as published by the Free Software Foundation; either
+//     version 3 of the License, or any later version.
+// 
+//     The CDP4 Batch Editor is distributed in the hope that it will be useful,
+//     but WITHOUT ANY WARRANTY; without even the implied warranty of
+//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+//     GNU Lesser General License version 3 for more details.
+// 
+//     You should have received a copy of the GNU Lesser General License
+//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  </copyright>
+//  --------------------------------------------------------------------------------------------------------------------
 
 namespace CDPBatchEditor.Tests.Services
 {
@@ -45,20 +45,6 @@ namespace CDPBatchEditor.Tests.Services
     [TestFixture]
     public class SessionServiceTestFixture
     {
-        private const string BaseUri = "http://test.com";
-        private Mock<ISession> session;
-        private Uri uri;
-        private SiteDirectory siteDirectory;
-        private Iteration iteration;
-        private DomainOfExpertise domain;
-        private Person person;
-        private Participant participant;
-        private Assembler assembler;
-        private SessionService sessionService;
-        private Mock<IFilterService> filterService;
-        private Mock<ICommandArguments> commandArguments;
-        private EngineeringModel engineeringModel;
-
         [SetUp]
         public void Setup()
         {
@@ -108,16 +94,36 @@ namespace CDPBatchEditor.Tests.Services
             this.sessionService = new SessionService(this.commandArguments.Object, this.filterService.Object, this.session.Object);
         }
 
-        [Test]
-        public void VerifySessionOpen()
+        private const string BaseUri = "http://test.com";
+        private Mock<ISession> session;
+        private Uri uri;
+        private SiteDirectory siteDirectory;
+        private Iteration iteration;
+        private DomainOfExpertise domain;
+        private Person person;
+        private Participant participant;
+        private Assembler assembler;
+        private SessionService sessionService;
+        private Mock<IFilterService> filterService;
+        private Mock<ICommandArguments> commandArguments;
+        private EngineeringModel engineeringModel;
+
+        private ThingTransaction CreateDummyTransactions()
         {
-            Assert.IsTrue(this.sessionService.IsSessionOpen());
+            var elementDefinition = new ElementDefinition(Guid.NewGuid(), this.assembler.Cache, this.uri);
+
+            this.iteration.Element.Add(elementDefinition);
+
+            var transactionContext = TransactionContextResolver.ResolveContext(this.iteration);
+            return new ThingTransaction(transactionContext, elementDefinition);
         }
 
         [Test]
-        public void VerifySetProperties()
+        public void VerifyOpen()
         {
-            Assert.IsTrue(this.sessionService.SetProperties());
+            this.session.Setup(x => x.Open());
+            this.sessionService.Open();
+            this.session.Verify(x => x.Open(), Times.Once);
         }
 
         [Test]
@@ -140,21 +146,15 @@ namespace CDPBatchEditor.Tests.Services
         }
 
         [Test]
-        public void VerifyOpen()
+        public void VerifySessionOpen()
         {
-            this.session.Setup(x => x.Open());
-            this.sessionService.Open();
-            this.session.Verify(x => x.Open(), Times.Once);
+            Assert.IsTrue(this.sessionService.IsSessionOpen());
         }
 
-        private ThingTransaction CreateDummyTransactions()
+        [Test]
+        public void VerifySetProperties()
         {
-            var elementDefinition = new ElementDefinition(Guid.NewGuid(), this.assembler.Cache, this.uri);
-
-            this.iteration.Element.Add(elementDefinition);
-
-            var transactionContext = TransactionContextResolver.ResolveContext(this.iteration);
-            return new ThingTransaction(transactionContext, elementDefinition);
+            Assert.IsTrue(this.sessionService.SetProperties());
         }
     }
 }
