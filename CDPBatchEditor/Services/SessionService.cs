@@ -87,11 +87,13 @@ namespace CDPBatchEditor.Services
         /// </summary>
         /// <param name="commandArguments">the <see cref="ICommandArguments" /> arguments instance.</param>
         /// <param name="filterService">the <see cref="IFilterService" /> that provides filters and filters helpers.</param>
+        /// <param name="messageBus">The INJECTED <see cref="ICDPMessageBus"/></param>
         [ExcludeFromCodeCoverage]
-        public SessionService(ICommandArguments commandArguments, IFilterService filterService)
+        public SessionService(ICommandArguments commandArguments, IFilterService filterService, ICDPMessageBus messageBus)
         {
             this.commandArguments = commandArguments;
             this.filterService = filterService;
+            this.messageBus = messageBus;
 
             if (!this.IsSessionOpen())
             {

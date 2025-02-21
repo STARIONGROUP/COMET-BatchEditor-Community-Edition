@@ -25,6 +25,13 @@
     -s http://localhost:5000 -u admin -p pass --action Subscribe -m LOFT --parameters mass_margin --element-definition a10_layers_MLI_on_tower --domain SYS
     -s http://localhost:5000 -u admin -p pass --action Subscribe -m LOFT --parameters n_items --element-definition a1mil_layer_kapton_on_BEE_boxes --domain THE
 
+## Override a parameter
+
+    -s http://localhost:5000 -u admin -p pass --action Override -m TestEngineeringModelSetup --parameters TestTextParameterType --element-definition TestElementDefinition 
+
+    -s http://localhost:5000 -u admin -p pass --action Override -m LOFT --parameters mass_margin --element-definition a10_layers_MLI_on_tower 
+    -s http://localhost:5000 -u admin -p pass --action Override -m LOFT --parameters n_items --include-owners SYS
+
 ## Move reference values to manual values
 
     -s http://localhost:5000 -u admin -p pass --action MoveReferenceValuesToManualValues -m TestEngineeringModelSetup --parameters TestTextParameterType --element-definition TestElementDefinition --domain TST

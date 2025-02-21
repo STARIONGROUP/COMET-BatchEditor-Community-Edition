@@ -1,5 +1,5 @@
 ﻿//  --------------------------------------------------------------------------------------------------------------------
-//  <copyright file="ISubscriptionCommand.cs" company="Starion Group S.A.">
+//  <copyright file="IOverrideCommand.cs" company="Starion Group S.A.">
 //     Copyright (c) 2015-2024 Starion Group S.A.
 // 
 //     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Sam Gerené
@@ -25,23 +25,15 @@
 
 namespace CDPBatchEditor.Commands.Command.Interface
 {
-    using CDP4Common.EngineeringModelData;
-
     /// <summary>
-    /// Defines an <see cref="IOptionCommand" /> that provides actions that are
-    /// <see cref="CDP4Common.EngineeringModelData.Option" /> related
+    /// Defines an <see cref="IOverrideCommand" /> that provides actions that are
+    /// <see cref="CDP4Common.EngineeringModelData.ParameterOverride" /> related
     /// </summary>
-    public interface ISubscriptionCommand
+    public interface IOverrideCommand
     {
         /// <summary>
-        /// Subscribe parameters and parameter overrides with given short names for given subscriber.
+        /// Override parameters with given short names.
         /// </summary>
-        void Subscribe();
-
-        /// <summary>
-        /// Set the switch on all value sets of the <see cref="ParameterSubscription" />s of the given subscriber to the given
-        /// switch value.
-        /// </summary>
-        public void SetParameterSubscriptionsSwitch();
+        void Override();
     }
 }

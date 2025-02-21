@@ -47,6 +47,7 @@ namespace CDPBatchEditor.Tests.Commands
             this.commandArguments = new Mock<ICommandArguments>();
             this.parameterCommand = new Mock<IParameterCommand>();
             this.subscriptionCommand = new Mock<ISubscriptionCommand>();
+            this.overrideCommand = new Mock<IOverrideCommand>();
             this.optionCommand = new Mock<IOptionCommand>();
             this.scaleCommand = new Mock<IScaleCommand>();
             this.stateCommand = new Mock<IStateCommand>();
@@ -57,7 +58,7 @@ namespace CDPBatchEditor.Tests.Commands
             this.commandArguments.Setup(x => x.Report).Returns(true);
 
             this.commandDispatcher = new CommandDispatcher(
-                this.commandArguments.Object, this.parameterCommand.Object, this.subscriptionCommand.Object, this.optionCommand.Object,
+                this.commandArguments.Object, this.parameterCommand.Object, this.subscriptionCommand.Object, this.overrideCommand.Object, this.optionCommand.Object,
                 this.scaleCommand.Object, this.stateCommand.Object, this.domainCommand.Object, this.valueSetCommand.Object, this.reportGenerator.Object);
         }
 
@@ -70,6 +71,7 @@ namespace CDPBatchEditor.Tests.Commands
         private Mock<IDomainCommand> domainCommand;
         private Mock<IValueSetCommand> valueSetCommand;
         private Mock<IReportGenerator> reportGenerator;
+        private Mock<IOverrideCommand> overrideCommand;
         private CommandDispatcher commandDispatcher;
 
         [Test]
@@ -100,6 +102,7 @@ namespace CDPBatchEditor.Tests.Commands
             this.optionCommand.Verify(x => x.ApplyOrRemoveOptionDependency(It.IsAny<bool>()), Times.Exactly(2));
             this.subscriptionCommand.Verify(x => x.Subscribe(), Times.Once);
             this.subscriptionCommand.Verify(x => x.SetParameterSubscriptionsSwitch(), Times.Once);
+            this.overrideCommand.Verify(x => x.Override(), Times.Once);
             this.parameterCommand.Verify(x => x.Add(), Times.Once);
             this.parameterCommand.Verify(x => x.Remove(), Times.Once);
             this.scaleCommand.Verify(x => x.AssignMeasurementScale(), Times.Once);
