@@ -71,6 +71,11 @@ namespace CDPBatchEditor.CommandArguments
         ChangeDomain,
 
         /// <summary>
+        /// Override parameters #
+        /// </summary>
+        Override,
+
+        /// <summary>
         /// Remove option dependency #
         /// </summary>
         RemoveOptionDependence,

@@ -66,6 +66,7 @@ namespace CDPBatchEditor
             containerBuilder.RegisterType<ParameterCommand>().As<IParameterCommand>();
             containerBuilder.RegisterType<StateCommand>().As<IStateCommand>();
             containerBuilder.RegisterType<SubscriptionCommand>().As<ISubscriptionCommand>();
+            containerBuilder.RegisterType<OverrideCommand>().As<IOverrideCommand>();
             containerBuilder.RegisterType<ValueSetCommand>().As<IValueSetCommand>();
             containerBuilder.RegisterType<ScaleCommand>().As<IScaleCommand>();
             containerBuilder.RegisterType<OptionCommand>().As<IOptionCommand>();

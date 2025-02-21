@@ -68,6 +68,7 @@ namespace CDPBatchEditor.CommandArguments
                        + "ApplyStateDependence,"
                        + "ChangeParameterOwnership,"
                        + "ChangeDomain,"
+                       + "Override,"
                        + "RemoveOptionDependence,"
                        + "RemoveStateDependence,"
                        + "SetGenericOwners,"
@@ -86,7 +87,7 @@ namespace CDPBatchEditor.CommandArguments
             Required = false,
             HelpText = "Comma-separated list of short names of parameters. "
                        + "Use in conjunction with --action=add-parameters | remove-parameters | change-parameter-ownership | subscribe "
-                       + "| apply-state-dependence | remove-state-dependence | apply-option-dependence | remove-option-dependence.")]
+                       + "| override | apply-state-dependence | remove-state-dependence | apply-option-dependence | remove-option-dependence.")]
         public IReadOnlyList<string> SelectedParameters { get; set; }
 
         /// <summary>

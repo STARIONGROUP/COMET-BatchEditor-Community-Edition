@@ -78,6 +78,11 @@ namespace CDPBatchEditor.Commands
         private readonly ISubscriptionCommand subscriptionCommand;
 
         /// <summary>
+        /// The <see cref="IOverrideCommand" /> command instance
+        /// </summary>
+        private readonly IOverrideCommand overrideCommand;
+        
+        /// <summary>
         /// The <see cref="IValueSetCommand" /> command instance
         /// </summary>
         private readonly IValueSetCommand valueSetCommand;
@@ -88,6 +93,7 @@ namespace CDPBatchEditor.Commands
         /// <param name="commandArguments">the command line options</param>
         /// <param name="parameterCommand">the parameter command</param>
         /// <param name="subscriptionCommand">the subscription command</param>
+        /// <param name="overrideCommand">the subscription command</param>
         /// <param name="optionCommand">the option command</param>
         /// <param name="scaleCommand">the scale command</param>
         /// <param name="stateCommand">the state command</param>
@@ -98,6 +104,7 @@ namespace CDPBatchEditor.Commands
             ICommandArguments commandArguments,
             IParameterCommand parameterCommand,
             ISubscriptionCommand subscriptionCommand,
+            IOverrideCommand overrideCommand,
             IOptionCommand optionCommand,
             IScaleCommand scaleCommand,
             IStateCommand stateCommand,
@@ -108,6 +115,7 @@ namespace CDPBatchEditor.Commands
             this.commandArguments = commandArguments;
             this.parameterCommand = parameterCommand;
             this.subscriptionCommand = subscriptionCommand;
+            this.overrideCommand = overrideCommand;
             this.optionCommand = optionCommand;
             this.scaleCommand = scaleCommand;
             this.stateCommand = stateCommand;
@@ -143,6 +151,9 @@ namespace CDPBatchEditor.Commands
                     break;
                 case CommandEnumeration.ChangeDomain:
                     this.domainCommand.ChangeDomain();
+                    break;
+                case CommandEnumeration.Override:
+                    this.overrideCommand.Override();
                     break;
                 case CommandEnumeration.RemoveOptionDependence:
                     this.optionCommand.ApplyOrRemoveOptionDependency(true);
