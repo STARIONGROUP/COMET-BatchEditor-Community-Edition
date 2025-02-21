@@ -92,8 +92,6 @@ namespace CDPBatchEditor.Commands.Command
             {
                 foreach (var elementDefinitionParameter in elementDefinition.Parameter)
                 {
-                    // From 10-25 docs:
-                    // Note 2: The owner DomainOfExpertise of this ParameterOverride is the same as the owner of the elementDefinition. 
                     var overrider = elementDefinitionParameter.Owner;
 
                     if (this.commandArguments.SelectedParameters.Contains(elementDefinitionParameter.ParameterType.ShortName))
