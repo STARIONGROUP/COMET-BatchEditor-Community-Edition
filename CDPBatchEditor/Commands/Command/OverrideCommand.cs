@@ -90,12 +90,12 @@ namespace CDPBatchEditor.Commands.Command
                 .Where(e => this.filterService.IsFilteredIn(e))
                 .OrderBy(x => x.ShortName).ToArray())
             {
-                // From 10-25 docs:
-                // Note 2: The owner DomainOfExpertise of this ParameterOverride is the same as the owner of the elementDefinition. 
-                var overrider = elementDefinition.Owner;
-
                 foreach (var elementDefinitionParameter in elementDefinition.Parameter)
                 {
+                    // From 10-25 docs:
+                    // Note 2: The owner DomainOfExpertise of this ParameterOverride is the same as the owner of the elementDefinition. 
+                    var overrider = elementDefinitionParameter.Owner;
+
                     if (this.commandArguments.SelectedParameters.Contains(elementDefinitionParameter.ParameterType.ShortName))
                     {
                         var specificElementUsages = allElementUsages.Where(x => x.ElementDefinition == elementDefinition).ToArray();
