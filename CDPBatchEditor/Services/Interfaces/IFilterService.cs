@@ -27,6 +27,7 @@ namespace CDPBatchEditor.Services.Interfaces
 {
     using System.Collections.Generic;
 
+    using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
 
@@ -36,9 +37,9 @@ namespace CDPBatchEditor.Services.Interfaces
     public interface IFilterService
     {
         /// <summary>
-        /// The ElementDefinition filter. The requested action is only applied to ElementDefinitions in this set.
+        /// The DefinedThing filter. The requested action is only applied to DefinedThings in this set.
         /// </summary>
-        HashSet<ElementDefinition> FilteredElementDefinitions { get; }
+        HashSet<DefinedThing> FilteredDefinedThings { get; }
 
         /// <summary>
         /// The short names of the Category filter. The requested action is only applied to ElementDefinitions that are a member of
@@ -53,41 +54,41 @@ namespace CDPBatchEditor.Services.Interfaces
         HashSet<DomainOfExpertise> IncludedOwners { get; }
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is included in the filter.
+        /// Check whether the given <see cref="DefinedThing" /> is included in the filter.
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="definedThing">
+        /// The <see cref="DefinedThing" /> to check.
         /// </param>
         /// <returns>
         /// If included returns true, otherwise false.
         /// </returns>
-        bool IsFilteredIn(ElementDefinition elementDefinition);
+        bool IsFilteredIn<T>(T definedThing) where T : DefinedThing, ICategorizableThing, IOwnedThing;
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is included in the filter. or the no element definition is
+        /// Check whether the given <see cref="DefinedThing" /> is included in the filter. or the no <see cref="DefinedThing" /> is
         /// specified
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="definedThing">
+        /// The <see cref="DefinedThing" /> to check.
         /// </param>
         /// <returns>
         /// If included returns true, otherwise false.
         /// </returns>
-        bool IsFilteredInOrFilterIsEmpty(ElementDefinition elementDefinition);
+        bool IsFilteredInOrFilterIsEmpty<T>(T definedThing) where T : DefinedThing, ICategorizableThing, IOwnedThing;
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is a member of the specified selected categories.
+        /// Check whether the given <see cref="ICategorizableThing" /> is a member of the specified selected categories.
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="categorizableThing">
+        /// The <see cref="ICategorizableThing" /> to check.
         /// </param>
         /// <returns>
-        /// True if no categories were specified or the given Element Definition is a member, otherwise false.
+        /// True if no categories were specified or the given <see cref="ICategorizableThing"/>> is a member, otherwise false.
         /// </returns>
-        bool IsMemberOfSelectedCategory(ElementDefinition elementDefinition);
+        bool IsMemberOfSelectedCategory<T>(T categorizableThing) where T : ICategorizableThing;
 
         /// <summary>
-        /// Process provided filtered Category, Domain of expertise and element definitions
+        /// Process provided filtered Category, Domain of expertise and element definitions, or Requirements
         /// </summary>
         /// <param name="iteration">The Selected <see cref="Iteration" /></param>
         /// <param name="allSiteDirectoryDomain">The list of domain existing in the site directory</param>
@@ -99,5 +100,12 @@ namespace CDPBatchEditor.Services.Interfaces
         /// <param name="parameter">The parameter to check against</param>
         /// <returns>Assert whether the current parameter is specified in the command line arguments or none was specified</returns>
         bool IsParameterSpecifiedOrAny(Parameter parameter);
+
+        /// <summary>
+        /// Verify if the current <see cref="SimpleParameterValue"/> is specified in the command line arguments or none was specified
+        /// </summary>
+        /// <param name="simpleParameterValue">The <see cref="SimpleParameterValue"/> to check against</param>
+        /// <returns>Assert whether the current parameter is specified in the command line arguments or none was specified</returns>
+        bool IsParameterSpecifiedOrAny(SimpleParameterValue simpleParameterValue);
     }
 }

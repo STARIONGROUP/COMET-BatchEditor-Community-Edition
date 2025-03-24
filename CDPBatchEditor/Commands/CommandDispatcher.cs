@@ -58,6 +58,11 @@ namespace CDPBatchEditor.Commands
         private readonly IParameterCommand parameterCommand;
 
         /// <summary>
+        /// The <see cref="IRequirementSimpleParameterValueCommand" /> command instance
+        /// </summary>
+        private readonly IRequirementSimpleParameterValueCommand requirementSimpleParameterValueCommand;
+
+        /// <summary>
         /// The <see cref="IReportGenerator" /> instance
         /// </summary>
         private readonly IReportGenerator reportGenerator;
@@ -103,6 +108,7 @@ namespace CDPBatchEditor.Commands
         public CommandDispatcher(
             ICommandArguments commandArguments,
             IParameterCommand parameterCommand,
+            IRequirementSimpleParameterValueCommand requirementSimpleParameterValueCommand,
             ISubscriptionCommand subscriptionCommand,
             IOverrideCommand overrideCommand,
             IOptionCommand optionCommand,
@@ -114,6 +120,7 @@ namespace CDPBatchEditor.Commands
         {
             this.commandArguments = commandArguments;
             this.parameterCommand = parameterCommand;
+            this.requirementSimpleParameterValueCommand = requirementSimpleParameterValueCommand;
             this.subscriptionCommand = subscriptionCommand;
             this.overrideCommand = overrideCommand;
             this.optionCommand = optionCommand;
@@ -136,6 +143,12 @@ namespace CDPBatchEditor.Commands
                     break;
                 case CommandEnumeration.RemoveParameters:
                     this.parameterCommand.Remove();
+                    break;
+                case CommandEnumeration.AddRequirementParameters:
+                    this.requirementSimpleParameterValueCommand.Add();
+                    break;
+                case CommandEnumeration.RemoveRequirementParameters:
+                    this.requirementSimpleParameterValueCommand.Remove();
                     break;
                 case CommandEnumeration.MoveReferenceValuesToManualValues:
                     this.valueSetCommand.MoveReferenceValuesToManualValues();

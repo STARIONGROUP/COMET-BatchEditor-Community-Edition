@@ -90,6 +90,11 @@ namespace CDPBatchEditor.CommandArguments.Interface
         string ElementDefinition { get; }
 
         /// <summary>
+        /// Gets or sets the short name of a requirements specification to be used as filter.
+        /// </summary>
+        string RequirementsSpecification { get; set; }
+
+        /// <summary>
         /// Gets or sets a list of short names of domains of expertise to be included as a filter.
         /// </summary>
         IList<string> IncludedOwners { get; }

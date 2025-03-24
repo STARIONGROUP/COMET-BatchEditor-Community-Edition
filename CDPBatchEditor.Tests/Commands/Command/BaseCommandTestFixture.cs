@@ -54,12 +54,14 @@ namespace CDPBatchEditor.Tests.Commands.Command
         private ElementDefinition elementDefinition2;
         private ElementDefinition elementDefinition3;
         private ElementDefinition elementDefinition4;
+        private RequirementsSpecification requirementsSpecification;
+        private Requirement requirement;
         private EngineeringModelSetup engineeringModelSetup;
         private EngineeringModel model;
         private ModelReferenceDataLibrary modelReferenceDataLibrary;
         private TextParameterType parameterType;
-        private TextParameterType parameterType2;
-        private SimpleQuantityKind parameterType3;
+        internal TextParameterType parameterType2;
+        internal SimpleQuantityKind parameterType3;
         private SimpleQuantityKind parameterType4;
         private SimpleQuantityKind parameterType5;
         private SimpleQuantityKind parameterType6;
@@ -71,6 +73,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
         private Mock<ICDPMessageBus> messageBus;
 
         private Uri uri;
+        private SimpleParameterValue simpleParametervalue;
 
         internal ICommandArguments CommandArguments { get; private set; }
 
@@ -156,6 +159,8 @@ namespace CDPBatchEditor.Tests.Commands.Command
 
             this.FilterService.Setup(x => x.ProcessFilters(this.Iteration, this.siteDirectory.Domain));
 
+            this.FilterService.Setup(x => x.IsFilteredIn(It.IsAny<Requirement>())).Returns((Func<Requirement, bool>)this.IsFilteredInMock);
+
             this.FilterService.Setup(x => x.IsFilteredIn(It.IsAny<ElementDefinition>())).Returns((Func<ElementDefinition, bool>) this.IsFilteredInMock);
             this.FilterService.Setup(x => x.IsFilteredInOrFilterIsEmpty(It.IsAny<ElementDefinition>())).Returns((Func<ElementDefinition, bool>) this.IsFilteredInOrFilterIsEmpty);
             this.FilterService.Setup(x => x.IsParameterSpecifiedOrAny(It.IsAny<Parameter>())).Returns((Func<Parameter, bool>) this.IsParameterSpecifiedOrAnyMock);
@@ -169,6 +174,11 @@ namespace CDPBatchEditor.Tests.Commands.Command
         private bool IsFilteredInMock(ElementDefinition element)
         {
             return this.CommandArguments.ElementDefinition == element.ShortName;
+        }
+
+        private bool IsFilteredInMock(Requirement requirement)
+        {
+            return true;
         }
 
         private bool IsParameterSpecifiedOrAnyMock(Parameter element)
@@ -212,6 +222,7 @@ namespace CDPBatchEditor.Tests.Commands.Command
             this.SetupScales();
             this.SetupFiniteStates();
             this.SetupElementDefinitionsAndUsages();
+            this.SetupRequirements();
 
             this.model.Iteration.Add(this.Iteration);
 
@@ -229,6 +240,30 @@ namespace CDPBatchEditor.Tests.Commands.Command
             this.Assembler.Cache.TryAdd(new CacheKey(this.Iteration.Iid, null), new Lazy<Thing>(() => this.Iteration));
 
             this.AddThingsInCache();
+        }
+
+        private void SetupRequirements()
+        {
+            this.requirementsSpecification = new RequirementsSpecification(Guid.NewGuid(), this.Assembler.Cache, this.uri) {ShortName = "testRequirementsSpecification", Owner = this.Domain, Container = this.Iteration
+            };
+
+            this.requirement = new Requirement(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ShortName = "testRequirement",
+                Owner = this.Domain, Container = this.requirementsSpecification
+            };
+
+            this.simpleParametervalue = new SimpleParameterValue(Guid.NewGuid(), this.Assembler.Cache, this.uri) { ParameterType = this.parameterType3, Container = this.requirement };
+
+            this.requirementsSpecification.Requirement.Add(this.requirement);
+
+            this.requirement.ParameterValue.Add(this.simpleParametervalue);
+
+            this.Assembler.Cache.TryAdd(new CacheKey(this.requirementsSpecification.Iid, this.Iteration.Iid), new Lazy<Thing>(() => this.requirementsSpecification));
+
+            this.Assembler.Cache.TryAdd(new CacheKey(this.requirement.Iid, this.Iteration.Iid), new Lazy<Thing>(() => this.requirement));
+
+            this.Assembler.Cache.TryAdd(new CacheKey(this.simpleParametervalue.Iid, this.Iteration.Iid), new Lazy<Thing>(() => this.simpleParametervalue));
+
+            this.Iteration.RequirementsSpecification.Add(this.requirementsSpecification);
         }
 
         private void AddThingsInCache()

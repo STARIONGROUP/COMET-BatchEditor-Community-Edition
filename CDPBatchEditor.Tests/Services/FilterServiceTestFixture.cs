@@ -123,7 +123,7 @@ namespace CDPBatchEditor.Tests.Services
             Assert.That(this.filterService.IsFilteredInOrFilterIsEmpty(this.elementDefinition), Is.True);
 
             Assert.That(this.filterService.IsFilteredInOrFilterIsEmpty(dummyElement), Is.False);
-            this.filterService.FilteredElementDefinitions.Clear();
+            this.filterService.FilteredDefinedThings.Clear();
             Assert.That(this.filterService.IsFilteredInOrFilterIsEmpty(dummyElement), Is.True);
         }
 
@@ -143,10 +143,10 @@ namespace CDPBatchEditor.Tests.Services
         [Test]
         public void VerifyProcessFilters()
         {
-            Assert.That(this.filterService.FilteredElementDefinitions, Is.Empty);
+            Assert.That(this.filterService.FilteredDefinedThings, Is.Empty);
             Assert.That(this.filterService.IncludedOwners, Is.Empty);
             this.filterService.ProcessFilters(this.iteration, this.siteDirectory.Domain);
-            Assert.That(this.filterService.FilteredElementDefinitions, Is.Not.Empty);
+            Assert.That(this.filterService.FilteredDefinedThings, Is.Not.Empty);
             Assert.That(this.filterService.IncludedOwners.Count, Is.EqualTo(2));
         }
     }

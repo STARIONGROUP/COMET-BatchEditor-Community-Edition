@@ -11,7 +11,7 @@
         <ToolCommandName>cdp4-comet-be</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <RootNamespace>CDPBatchEditor</RootNamespace>
-        <Version>4.1.0</Version>
+        <Version>4.2.0</Version>
         <PackageIcon>cdp4-icon.png</PackageIcon>
         <PackageReleaseNotes>
             [Update] Starion Group

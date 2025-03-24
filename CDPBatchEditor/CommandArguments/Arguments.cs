@@ -63,6 +63,10 @@ namespace CDPBatchEditor.CommandArguments
             HelpText = "Batch action to perform on the engineering model(s). Possible value is one of:"
                        + "AddParameters,"
                        + "RemoveParameters,"
+                       + "AddRequirementParameters,"
+                       + "RemoveRequirementParameters,"
+                       + "AddRequirementParameters,"
+                       + "RemoveRequirementParameters,"
                        + "MoveReferenceValuesToManualValues,"
                        + "ApplyOptionDependence,"
                        + "ApplyStateDependence,"
@@ -110,6 +114,16 @@ namespace CDPBatchEditor.CommandArguments
             HelpText = "Short name of an Element Definition that sets the top node of a decomposition subtree. Use in conjunction with --action. "
                        + "The specified action will only be applied to the given Element Definition and its subtree of contained Element Definitions.")]
         public string ElementDefinition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the short name of a requirements specification to be used as filter.
+        /// </summary>
+        [Option(
+            "requirements-specification",
+            Required = false,
+            HelpText = "Short name of a Requirements Specification that sets the Requirements Specification. Use in conjunction with --action. "
+                       + "The specified action will only be applied to the given RequirementsSepcification's subtree of contained Requirements.")]
+        public string RequirementsSpecification { get; set; }
 
         /// <summary>
         /// Gets or sets a list of short names of domains of expertise to be included as a filter.

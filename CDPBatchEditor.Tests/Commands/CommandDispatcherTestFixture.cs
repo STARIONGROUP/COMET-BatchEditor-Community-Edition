@@ -46,6 +46,7 @@ namespace CDPBatchEditor.Tests.Commands
         {
             this.commandArguments = new Mock<ICommandArguments>();
             this.parameterCommand = new Mock<IParameterCommand>();
+            this.requirementSimpleParameterValueCommand = new Mock<IRequirementSimpleParameterValueCommand>();
             this.subscriptionCommand = new Mock<ISubscriptionCommand>();
             this.overrideCommand = new Mock<IOverrideCommand>();
             this.optionCommand = new Mock<IOptionCommand>();
@@ -58,12 +59,13 @@ namespace CDPBatchEditor.Tests.Commands
             this.commandArguments.Setup(x => x.Report).Returns(true);
 
             this.commandDispatcher = new CommandDispatcher(
-                this.commandArguments.Object, this.parameterCommand.Object, this.subscriptionCommand.Object, this.overrideCommand.Object, this.optionCommand.Object,
+                this.commandArguments.Object, this.parameterCommand.Object, this.requirementSimpleParameterValueCommand.Object, this.subscriptionCommand.Object, this.overrideCommand.Object, this.optionCommand.Object,
                 this.scaleCommand.Object, this.stateCommand.Object, this.domainCommand.Object, this.valueSetCommand.Object, this.reportGenerator.Object);
         }
 
         private Mock<ICommandArguments> commandArguments;
         private Mock<IParameterCommand> parameterCommand;
+        private Mock<IRequirementSimpleParameterValueCommand> requirementSimpleParameterValueCommand;
         private Mock<ISubscriptionCommand> subscriptionCommand;
         private Mock<IOptionCommand> optionCommand;
         private Mock<IScaleCommand> scaleCommand;
@@ -105,6 +107,8 @@ namespace CDPBatchEditor.Tests.Commands
             this.overrideCommand.Verify(x => x.Override(), Times.Once);
             this.parameterCommand.Verify(x => x.Add(), Times.Once);
             this.parameterCommand.Verify(x => x.Remove(), Times.Once);
+            this.requirementSimpleParameterValueCommand.Verify(x => x.Add(), Times.Once);
+            this.requirementSimpleParameterValueCommand.Verify(x => x.Remove(), Times.Once);
             this.scaleCommand.Verify(x => x.AssignMeasurementScale(), Times.Once);
             this.scaleCommand.Verify(x => x.StandardizeDimensionsInMillimetre(), Times.Once);
 
