@@ -78,3 +78,9 @@
 ## SetSubscriptionSwitch
 
     -s http://localhost:5000 -u admin -p pass --action SetSubscriptionSwitch --parameter-switch COMPUTED -m LOFT --parameters l --element-definition a10_layers_MLI_on_tower --domain SYS
+
+## AddRequirementParameter
+    -s http://localhost:5000 -u admin -p pass --action AddRequirementParameters -m LOFT --parameters l --requirements-specification ReqSpec1 --domain SYS
+
+## RemoveRequirementParameter
+    -s http://localhost:5000 -u admin -p pass --action RemoveRequirementParameters -m LOFT --parameters l --requirements-specification ReqSpec1 --domain SYS

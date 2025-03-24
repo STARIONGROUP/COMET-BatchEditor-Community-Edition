@@ -1,6 +1,6 @@
 ﻿//  --------------------------------------------------------------------------------------------------------------------
 //  <copyright file="Arguments.cs" company="Starion Group S.A.">
-//     Copyright (c) 2015-2024 Starion Group S.A.
+//     Copyright (c) 2015-2025 Starion Group S.A.
 // 
 //     Author: Nathanael Smiechowski, Alex Vorobiev, Alexander van Delft, Sam Gerené
 // 
@@ -88,8 +88,8 @@ namespace CDPBatchEditor.CommandArguments
             Separator = ',',
             Required = false,
             HelpText = "Comma-separated list of short names of parameters. "
-                       + "Use in conjunction with --action=add-parameters | remove-parameters | change-parameter-ownership | subscribe "
-                       + "| override | apply-state-dependence | remove-state-dependence | apply-option-dependence | remove-option-dependence.")]
+                       + "Use in conjunction with --action=AddParameters | RemoveParameters | AddRequirementParameters | RemoveRequirementParameters |ChangeDomain | Subscribe "
+                       + "| Override | ApplyStateDependence | RemoveStateDependence | ApplyOptionDependence | RemoveOptionDependence.")]
         public IReadOnlyList<string> SelectedParameters { get; set; }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace CDPBatchEditor.CommandArguments
         [Option(
             "requirements-specification",
             Required = false,
-            HelpText = "Short name of a Requirements Specification that sets the Requirements Specification. Use in conjunction with --action. "
+            HelpText = "Short name of a Requirements Specification that sets the Requirements Specification. Use in conjunction with --action= AddRequirementParameters | RemoveRequirementParameters. "
                        + "The specified action will only be applied to the given RequirementsSepcification's subtree of contained Requirements.")]
         public string RequirementsSpecification { get; set; }
 
@@ -154,7 +154,7 @@ namespace CDPBatchEditor.CommandArguments
             "domain",
             Required = false,
             HelpText = "Short name of a domain-of-expertise owner or subscriber. "
-                       + "Use in conjunction with --action=add-parameters | change-parameter-ownership | set-subscription-switch | subscribe.")]
+                       + "Use in conjunction with --action=AddParameters | ChangeParameterOwnership | SetSubscriptionSwitch | Subscribe.")]
         public string DomainOfExpertise { get; set; }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace CDPBatchEditor.CommandArguments
         [Option(
             "to-domain",
             Required = false,
-            HelpText = "Short name of a domain-of-expertise to change to. " + "Use in conjunction with --change-domain.")]
+            HelpText = "Short name of a domain-of-expertise to change to. " + "Use in conjunction with --ChangeDomain.")]
         public string ToDomainOfExpertise { get; set; }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace CDPBatchEditor.CommandArguments
             "state",
             Required = false,
             HelpText = "Short name of an actual finite state list on which to make parameters state dependent. "
-                       + "Use in conjunction with --action=apply-state-dependence and --parameters.")]
+                       + "Use in conjunction with --action=ApplyStateDependence | RemoveStateDependence and --parameters.")]
         public string StateListName { get; set; }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace CDPBatchEditor.CommandArguments
             "parameter-group",
             Required = false,
             HelpText = "Name of a parameter group into which new parameters will be added. "
-                       + "If it does not exist, the parameter group will be created. " + "Use in conjunction with --action=add-parameters.")]
+                       + "If it does not exist, the parameter group will be created. " + "Use in conjunction with --action=AddParameters.")]
         public string ParameterGroup { get; set; }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace CDPBatchEditor.CommandArguments
             Required = false,
             HelpText = "Short name of a measurement scale to be assigned to selected parameters. "
                        + "The assignment will only be performed if the scale is one of the possible scales of the parameter. "
-                       + "Use in conjunction with --action=set-scale and --parameters.")]
+                       + "Use in conjunction with --action=SetScale and --parameters.")]
         public string Scale { get; set; }
 
         /// <summary>
