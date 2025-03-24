@@ -2,7 +2,7 @@
   "profiles": {
     "CDPBatchEditor": {
       "commandName": "Project",
-      "commandLineArgs": " --action RemoveRequirementParameters -m USV -u admin -p pass --parameters m --requirements-specification SR --included-owners COMMIT -s http://localhost:5000"
+      "commandLineArgs": " -s http://localhost:5000 -u admin -p pass --report -m LOFT "
     }
   }
 }

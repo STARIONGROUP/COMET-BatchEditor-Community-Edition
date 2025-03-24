@@ -65,8 +65,6 @@ namespace CDPBatchEditor.CommandArguments
                        + "RemoveParameters,"
                        + "AddRequirementParameters,"
                        + "RemoveRequirementParameters,"
-                       + "AddRequirementParameters,"
-                       + "RemoveRequirementParameters,"
                        + "MoveReferenceValuesToManualValues,"
                        + "ApplyOptionDependence,"
                        + "ApplyStateDependence,"
