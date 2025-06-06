@@ -29,6 +29,7 @@ namespace CDPBatchEditor.Services
     using System.Collections.Generic;
     using System.Linq;
 
+    using CDP4Common.CommonData;
     using CDP4Common.EngineeringModelData;
     using CDP4Common.SiteDirectoryData;
 
@@ -56,71 +57,71 @@ namespace CDPBatchEditor.Services
         }
 
         /// <summary>
-        /// The ElementDefinition filter. The requested action is only applied to ElementDefinitions in this set.
+        /// The ElementDefinition filter. The requested action is only applied to ElementDefinition in this set.
         /// </summary>
-        public HashSet<ElementDefinition> FilteredElementDefinitions { get; } = new HashSet<ElementDefinition>();
+        public HashSet<DefinedThing> FilteredDefinedThings { get; } = new();
 
         /// <summary>
-        /// The short names of the Category filter. The requested action is only applied to ElementDefinitions that are a member of
+        /// The short names of the Category filter. The requested action is only applied to Things that are a member of
         /// these categories.
         /// </summary>
-        public HashSet<string> FilteredCategoryShortNames { get; } = new HashSet<string>();
+        public HashSet<string> FilteredCategoryShortNames { get; } = new();
 
         /// <summary>
-        /// The DomainOfExpertise owners filter. The requested action is only applied to ElementDefinitions owned by domains
+        /// The DomainOfExpertise owners filter. The requested action is only applied to Things owned by domains
         /// included in this set.
         /// </summary>
-        public HashSet<DomainOfExpertise> IncludedOwners { get; } = new HashSet<DomainOfExpertise>();
+        public HashSet<DomainOfExpertise> IncludedOwners { get; } = new();
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is included in the filter.
+        /// Check whether the given <see cref="DefinedThing" /> is included in the filter.
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="definedThing">
+        /// The <see cref="DefinedThing" /> to check.
         /// </param>
         /// <returns>
         /// If included returns true, otherwise false.
         /// </returns>
-        public bool IsFilteredIn(ElementDefinition elementDefinition)
+        public bool IsFilteredIn<T>(T definedThing) where T : DefinedThing, ICategorizableThing, IOwnedThing
         {
-            return this.FilteredElementDefinitions.Contains(elementDefinition) && this.IsMemberOfSelectedCategory(elementDefinition)
-                                                                               && this.IncludedOwners.Contains(elementDefinition.Owner);
+            return this.FilteredDefinedThings.Contains(definedThing) && this.IsMemberOfSelectedCategory(definedThing)
+                                                                     && this.IncludedOwners.Contains(definedThing.Owner);
         }
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is included in the filter. or the no element definition is
+        /// Check whether the given <see cref="DefinedThing" /> is included in the filter. or the no <see cref="DefinedThing" /> is
         /// specified
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="definedThing">
+        /// The <see cref="DefinedThing" /> to check.
         /// </param>
         /// <returns>
         /// If included returns true, otherwise false.
         /// </returns>
-        public bool IsFilteredInOrFilterIsEmpty(ElementDefinition elementDefinition)
+        public bool IsFilteredInOrFilterIsEmpty<T>(T definedThing) where T : DefinedThing, ICategorizableThing, IOwnedThing
         {
-            return !this.FilteredElementDefinitions.Any() || this.IsFilteredIn(elementDefinition);
+            return !this.FilteredDefinedThings.Any() || this.IsFilteredIn(definedThing);
         }
 
         /// <summary>
-        /// Check whether the given <see cref="ElementDefinition" /> is a member of the specified selected categories.
+        /// Check whether the given <see cref="ICategorizableThing" /> is a member of the specified selected categories.
         /// </summary>
-        /// <param name="elementDefinition">
-        /// The <see cref="ElementDefinition" /> to check.
+        /// <param name="categorizableThing">
+        /// The <see cref="ICategorizableThing" /> to check.
         /// </param>
         /// <returns>
-        /// True if no categories were specified or the given Element Definition is a member, otherwise false.
+        /// True if no categories were specified or the given <see cref="ICategorizableThing"/>> is a member, otherwise false.
         /// </returns>
-        public bool IsMemberOfSelectedCategory(ElementDefinition elementDefinition)
+        public bool IsMemberOfSelectedCategory<T>(T categorizableThing) where T : ICategorizableThing
         {
             if (!this.FilteredCategoryShortNames.Any())
             {
                 return true;
             }
 
-            var elementCategoryShortNames = elementDefinition.Category.Select(cat => cat.ShortName);
+            var categorizableThingCategoryShortNames = categorizableThing.Category.Select(cat => cat.ShortName);
 
-            return this.FilteredCategoryShortNames.Intersect(elementCategoryShortNames).Any();
+            return this.FilteredCategoryShortNames.Intersect(categorizableThingCategoryShortNames).Any();
         }
 
         /// <summary>
@@ -134,26 +135,10 @@ namespace CDPBatchEditor.Services
 
             this.FilteredCategoryShortNames.AddRange(this.commandArguments.FilteredCategories?.Select(n => n.Trim()));
 
-            this.FilteredElementDefinitions.Clear();
+            this.FilteredDefinedThings.Clear();
 
-            if (string.IsNullOrWhiteSpace(this.commandArguments.ElementDefinition))
-            {
-                this.FilteredElementDefinitions.AddRange(iteration.Element);
-            }
-            else
-            {
-                var topOfSubTreeShortName = this.commandArguments.ElementDefinition.Trim();
-                var topOfSubTree = iteration.Element.FirstOrDefault(ed => ed.ShortName == topOfSubTreeShortName);
-
-                if (topOfSubTree == null)
-                {
-                    Console.WriteLine($"Cannot find Element Definition with short name {topOfSubTreeShortName} for --filtered-subtree");
-                }
-                else
-                {
-                    this.CollectSubTreeElementDefinitions(topOfSubTree, this.FilteredElementDefinitions);
-                }
-            }
+            this.ProcessElementDefinitionFilters(iteration);
+            this.ProcessRequirementFilters(iteration);
 
             this.IncludedOwners.Clear();
 
@@ -169,6 +154,58 @@ namespace CDPBatchEditor.Services
         }
 
         /// <summary>
+        /// Process provided filtered Category, Domain of expertise and element definitions
+        /// </summary>
+        /// <param name="iteration">The Selected <see cref="Iteration" /></param>
+        private void ProcessElementDefinitionFilters(Iteration iteration)
+        {
+            if (string.IsNullOrWhiteSpace(this.commandArguments.ElementDefinition))
+            {
+                this.FilteredDefinedThings.AddRange(iteration.Element);
+            }
+            else
+            {
+                var topOfSubTreeShortName = this.commandArguments.ElementDefinition.Trim();
+                var topOfSubTree = iteration.Element.FirstOrDefault(ed => ed.ShortName == topOfSubTreeShortName);
+
+                if (topOfSubTree == null)
+                {
+                    Console.WriteLine($"Cannot find Element Definition with short name {topOfSubTreeShortName} for --element-definition");
+                }
+                else
+                {
+                       this.CollectSubTreeElementDefinitions(topOfSubTree);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Process provided filtered Category, Domain of expertise and requirements
+        /// </summary>
+        /// <param name="iteration">The Selected <see cref="Iteration" /></param>
+        private void ProcessRequirementFilters(Iteration iteration)
+        {
+            if (string.IsNullOrWhiteSpace(this.commandArguments.RequirementsSpecification))
+            {
+                this.FilteredDefinedThings.AddRange(iteration.RequirementsSpecification.SelectMany(x => x.Requirement));
+            }
+            else
+            {
+                var topOfSubTreeShortName = this.commandArguments.RequirementsSpecification.Trim();
+                var topOfSubTree = iteration.RequirementsSpecification.FirstOrDefault(ed => ed.ShortName == topOfSubTreeShortName);
+
+                if (topOfSubTree == null)
+                {
+                    Console.WriteLine($"Cannot find Requirements Specification with short name {topOfSubTreeShortName} for --requirements-specification");
+                }
+                else
+                {
+                    this.FilteredDefinedThings.AddRange(topOfSubTree.Requirement);
+                }
+            }
+        }
+
+        /// <summary>
         /// Verify if the current parameter is specified in the command line arguments or none was specified
         /// </summary>
         /// <param name="parameter">The parameter to check against</param>
@@ -180,24 +217,32 @@ namespace CDPBatchEditor.Services
         }
 
         /// <summary>
+        /// Verify if the current <see cref="SimpleParameterValue"/> is specified in the command line arguments or none was specified
+        /// </summary>
+        /// <param name="simpleParameterValue">The <see cref="SimpleParameterValue"/> to check against</param>
+        /// <returns>Assert whether the current parameter is specified in the command line arguments or none was specified</returns>
+        public bool IsParameterSpecifiedOrAny(SimpleParameterValue simpleParameterValue)
+        {
+            var isNotEmpty = this.commandArguments.SelectedParameters.Any();
+            return !isNotEmpty || this.commandArguments.SelectedParameters.Contains(simpleParameterValue.ParameterType.ShortName);
+        }
+
+        /// <summary>
         /// Collect all Element Definitions contained in the subtree of a given top Element Definition.
         /// </summary>
         /// <param name="topOfSubTree">
         /// The top <see cref="ElementDefinition" /> of a subtree to be derived.
         /// </param>
-        /// <param name="subTreeElementDefinitions">
-        /// Set to store to the subtree Element Definitions.
-        /// </param>
-        private void CollectSubTreeElementDefinitions(ElementDefinition topOfSubTree, HashSet<ElementDefinition> subTreeElementDefinitions)
+        private void CollectSubTreeElementDefinitions(ElementDefinition topOfSubTree)
         {
-            subTreeElementDefinitions.Add(topOfSubTree);
+            this.FilteredDefinedThings.Add(topOfSubTree);
 
             foreach (var elementUsage in topOfSubTree.ContainedElement)
             {
-                subTreeElementDefinitions.Add(elementUsage.ElementDefinition);
+                this.FilteredDefinedThings.Add(elementUsage.ElementDefinition);
 
                 // Recursively add the lower level subtree elements
-                this.CollectSubTreeElementDefinitions(elementUsage.ElementDefinition, subTreeElementDefinitions);
+                this.CollectSubTreeElementDefinitions(elementUsage.ElementDefinition);
             }
         }
     }

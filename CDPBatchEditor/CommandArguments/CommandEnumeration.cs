@@ -46,6 +46,16 @@ namespace CDPBatchEditor.CommandArguments
         RemoveParameters,
 
         /// <summary>
+        /// Add requirement SimpleParameterValues #
+        /// </summary>
+        AddRequirementParameters,
+
+        /// <summary>
+        /// Remove requirement SimpleParameterValues #
+        /// </summary>
+        RemoveRequirementParameters,
+
+        /// <summary>
         /// Reference the manual value on a value set #
         /// </summary>
         MoveReferenceValuesToManualValues,
