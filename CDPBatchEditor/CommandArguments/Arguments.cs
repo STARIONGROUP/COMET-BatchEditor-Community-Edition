@@ -76,8 +76,31 @@ namespace CDPBatchEditor.CommandArguments
                        + "SetScale,"
                        + "SetShapeScaleMm,"
                        + "SetSubscriptionSwitch,"
-                       + "Subscribe")]
+                       + "Subscribe,"
+                       + "SyncElementDefinitions")]
         public CommandEnumeration Command { get; set; }
+
+        /// <summary>
+        /// Gets or sets the short name of the source engineering model to copy Element Definitions from.
+        /// <code>longName = 'source-model'</code>
+        /// </summary>
+        [Option(
+            "source-model",
+            Required = false,
+            HelpText = "Short name of the source engineering model to copy Element Definitions from. "
+                       + "Use in conjunction with --action=SyncElementDefinitions and --target-model.")]
+        public string SourceModel { get; set; }
+
+        /// <summary>
+        /// Gets or sets the short name of the target engineering model to copy or update Element Definitions into.
+        /// <code>longName = 'target-model'</code>
+        /// </summary>
+        [Option(
+            "target-model",
+            Required = false,
+            HelpText = "Short name of the target engineering model to copy or update Element Definitions into. "
+                       + "Use in conjunction with --action=SyncElementDefinitions and --source-model.")]
+        public string TargetModel { get; set; }
 
         /// <summary>
         /// Gets or sets a list of short names of selected parameters.
@@ -88,7 +111,8 @@ namespace CDPBatchEditor.CommandArguments
             Required = false,
             HelpText = "Comma-separated list of short names of parameters. "
                        + "Use in conjunction with --action=AddParameters | RemoveParameters | AddRequirementParameters | RemoveRequirementParameters |ChangeDomain | Subscribe "
-                       + "| Override | ApplyStateDependence | RemoveStateDependence | ApplyOptionDependence | RemoveOptionDependence.")]
+                       + "| Override | ApplyStateDependence | RemoveStateDependence | ApplyOptionDependence | RemoveOptionDependence | SyncElementDefinitions. "
+                       + "For SyncElementDefinitions, only the listed parameters are copied or updated; if omitted all parameters are copied.")]
         public IReadOnlyList<string> SelectedParameters { get; set; }
 
         /// <summary>
@@ -99,8 +123,21 @@ namespace CDPBatchEditor.CommandArguments
             Separator = ',',
             Required = false,
             HelpText = "Comma-separated list of short names of categories. Use in conjunction with --action. "
-                       + "The specified action will only be applied to Element Definitions that are a member of at least one of the given categories.")]
+                       + "The specified action will only be applied to Element Definitions that are a member of at least one of the given categories. "
+                       + "For SyncElementDefinitions, only source Element Definitions that are a member of at least one of the given categories are copied or updated.")]
         public IList<string> FilteredCategories { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of short names of element usage categories used to also pull in child element usages.
+        /// </summary>
+        [Option(
+            "element-usage-categories",
+            Separator = ',',
+            Required = false,
+            HelpText = "Comma-separated list of short names of element usage categories. Use in conjunction with --action=SyncElementDefinitions. "
+                       + "Child Element Usages of the copied Element Definitions that are a member of at least one of the given element usage categories "
+                       + "are also copied (the usage, its referenced Element Definition and its Parameter Overrides).")]
+        public IList<string> ElementUsageCategories { get; set; }
 
         /// <summary>
         /// Gets or sets the short name of an element definition to be used as the top node of sub-tree filter.

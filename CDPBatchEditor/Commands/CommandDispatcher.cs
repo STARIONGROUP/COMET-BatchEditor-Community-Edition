@@ -81,6 +81,11 @@ namespace CDPBatchEditor.Commands
         private readonly ISubscriptionCommand subscriptionCommand;
 
         /// <summary>
+        /// The <see cref="ISyncCommand" /> command instance
+        /// </summary>
+        private readonly ISyncCommand syncCommand;
+
+        /// <summary>
         /// The <see cref="IOverrideCommand" /> command instance
         /// </summary>
         private readonly IOverrideCommand overrideCommand;
@@ -102,6 +107,7 @@ namespace CDPBatchEditor.Commands
         /// <param name="stateCommand">the state command</param>
         /// <param name="domainCommand">the domain command</param>
         /// <param name="valueSetCommand">the value set command</param>
+        /// <param name="syncCommand">the sync command</param>
         /// <param name="reportGenerator">the reportgernerator command</param>
         public CommandDispatcher(
             ICommandArguments commandArguments,
@@ -114,6 +120,7 @@ namespace CDPBatchEditor.Commands
             IStateCommand stateCommand,
             IDomainCommand domainCommand,
             IValueSetCommand valueSetCommand,
+            ISyncCommand syncCommand,
             IReportGenerator reportGenerator)
         {
             this.commandArguments = commandArguments;
@@ -126,6 +133,7 @@ namespace CDPBatchEditor.Commands
             this.stateCommand = stateCommand;
             this.domainCommand = domainCommand;
             this.valueSetCommand = valueSetCommand;
+            this.syncCommand = syncCommand;
             this.reportGenerator = reportGenerator;
         }
 
@@ -187,13 +195,18 @@ namespace CDPBatchEditor.Commands
                 case CommandEnumeration.Subscribe:
                     this.subscriptionCommand.Subscribe();
                     break;
+                case CommandEnumeration.SyncElementDefinitions:
+                    this.syncCommand.Sync();
+                    break;
                 case CommandEnumeration.Unspecified:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (this.commandArguments.Report)
+            // SyncElementDefinitions writes its own copy report and operates on the source/target iterations rather than
+            // the single Iteration the CSV report generator expects, so the CSV report does not apply to it.
+            if (this.commandArguments.Report && this.commandArguments.Command != CommandEnumeration.SyncElementDefinitions)
             {
                 this.reportGenerator.ParametersToCsv();
             }

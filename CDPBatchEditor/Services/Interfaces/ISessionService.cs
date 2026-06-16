@@ -46,6 +46,16 @@ namespace CDPBatchEditor.Services.Interfaces
         Iteration Iteration { get; }
 
         /// <summary>
+        /// Gets the source <see cref="Iteration" /> used by the SyncElementDefinitions action
+        /// </summary>
+        Iteration SourceIteration { get; }
+
+        /// <summary>
+        /// Gets the target <see cref="Iteration" /> used by the SyncElementDefinitions action
+        /// </summary>
+        Iteration TargetIteration { get; }
+
+        /// <summary>
         /// Gets or sets the domain of expertise
         /// </summary>
         DomainOfExpertise DomainOfExpertise { get; }
@@ -102,5 +112,12 @@ namespace CDPBatchEditor.Services.Interfaces
         /// </summary>
         /// <returns></returns>
         void Open();
+
+        /// <summary>
+        /// Reads the source and target <see cref="EngineeringModel" /> iterations (as identified by the
+        /// <c>--source-model</c> and <c>--target-model</c> arguments) into the open <see cref="ISession" />.
+        /// </summary>
+        /// <returns>Assert whether both the source and target iterations were resolved and read.</returns>
+        bool ReadSourceAndTargetModels();
     }
 }
