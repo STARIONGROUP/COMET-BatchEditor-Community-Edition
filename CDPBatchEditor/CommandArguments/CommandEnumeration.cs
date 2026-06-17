@@ -60,6 +60,21 @@ namespace CDPBatchEditor.CommandArguments
         MoveReferenceValuesToManualValues,
 
         /// <summary>
+        /// Move Manual Values to Reference Values
+        /// </summary>
+        MoveManualValuesToReferenceValues,
+
+        /// <summary>
+        /// Set Value Switch to Computed
+        /// </summary>
+        SetValueSwitchToComputed,
+        
+        /// <summary>
+        /// Set Value Switch to Reference
+        /// </summary>
+        SetValueSwitchToReference,
+
+        /// <summary>
         /// Add an option dependency #
         /// </summary>
         ApplyOptionDependence,
@@ -118,6 +133,12 @@ namespace CDPBatchEditor.CommandArguments
         /// Subscribe to parameters #
         /// <example>action=Subscribe --parameters=height,length,mass --domain=Thermal</example>
         /// </summary>
-        Subscribe
+        Subscribe,
+
+        /// <summary>
+        /// Subscribe to parameters #
+        /// <example>action=Subscribe --parameters=height,length,mass --domain=Thermal</example>
+        /// </summary>
+        CreateParameterOverride
     }
 }

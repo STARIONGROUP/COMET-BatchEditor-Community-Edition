@@ -41,5 +41,6 @@ namespace CDPBatchEditor.Commands.Command.Interface
         /// switch value.
         /// </summary>
         public void SetParameterSubscriptionsSwitch();
+
     }
 }

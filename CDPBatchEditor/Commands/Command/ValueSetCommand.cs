@@ -90,8 +90,9 @@ namespace CDPBatchEditor.Commands.Command
                     var refValue = valueSet?.Reference;
                     var manualValue = valueSet?.Manual;
 
-                    if (valueSet?.ValueSwitch == ParameterSwitchKind.REFERENCE && manualValue[0] == "-")
-                    {
+                    if ((parameter.ParameterType is ScalarParameterType) || (parameter.ParameterType is EnumerationParameterType))
+                        if (valueSet ?.ValueSwitch == ParameterSwitchKind.REFERENCE && manualValue[0] == "-" && refValue[0] != "-")
+                        {
                         var valueSetClone = valueSet.Clone(true);
                         var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
                         valueSetClone.Manual[0] = refValue[0];
@@ -101,6 +102,126 @@ namespace CDPBatchEditor.Commands.Command
                         this.sessionService.Transactions.Add(transaction);
 
                         Console.WriteLine($"Moved {parameter.UserFriendlyShortName} = {refValue[0]} ref value to manual value and changed switch to MANUAL");
+                        }
+                    else if (parameter.ParameterType is CompoundParameterType compType)
+                        {
+                            var valueSetClone = valueSet.Clone(true);
+                            var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
+                            foreach (ParameterTypeComponent comp in compType.Component)
+                            {
+                                if (manualValue[comp.Index] == "-" && refValue[comp.Index] != "-")
+                                {
+                                    valueSetClone.Manual[comp.Index] = refValue[comp.Index];
+                                    valueSetClone.ValueSwitch = ParameterSwitchKind.MANUAL;
+                                    valueSetClone.Reference[comp.Index] = "-";
+                                    transaction.CreateOrUpdate(valueSetClone);
+                                    this.sessionService.Transactions.Add(transaction);
+                                    Console.WriteLine($"Moved {parameter.UserFriendlyShortName}.{comp.ShortName} = {refValue[comp.Index]} reference value to manual value and changed switch to MANUAL");
+                                }
+
+                            }
+
+                        }
+                }
+            }
+        }
+            
+
+        
+
+
+        public void MoveManualValuesToReferenceValues()
+        {
+            foreach (var parameter in this.sessionService.Iteration.Element.Where(e => this.filterService.IsFilteredIn(e))
+                .SelectMany(e => e.Parameter).OrderBy(x => x.ParameterType.ShortName))
+            {
+                if (this.filterService.IsParameterSpecifiedOrAny(parameter))
+                {
+                    var valueSet = parameter.ValueSet.FirstOrDefault();
+                    var refValue = valueSet?.Reference;
+                    var manualValue = valueSet?.Manual;
+
+                    if ((parameter.ParameterType is ScalarParameterType) || (parameter.ParameterType is EnumerationParameterType)) { 
+                        if (valueSet?.ValueSwitch == ParameterSwitchKind.MANUAL && refValue[0] == "-" && manualValue[0] != "-")
+                        {
+                            var valueSetClone = valueSet.Clone(true);
+                            var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
+                            valueSetClone.Reference[0] = manualValue[0];
+                            valueSetClone.ValueSwitch = ParameterSwitchKind.REFERENCE;
+                            valueSetClone.Manual[0] = "-";
+                            transaction.CreateOrUpdate(valueSetClone);
+                            this.sessionService.Transactions.Add(transaction);
+
+                            Console.WriteLine($"Moved {parameter.UserFriendlyShortName} = {manualValue[0]} manual value to reference value and changed switch to REFERENCE");
+                        }
+                }
+                else if (parameter.ParameterType is CompoundParameterType compType)
+                    if (valueSet?.ValueSwitch == ParameterSwitchKind.MANUAL)
+                    {
+                        var valueSetClone = valueSet.Clone(true);
+                        var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
+                        foreach (ParameterTypeComponent comp in compType.Component)
+                        {
+                            if (refValue[comp.Index] == "-" && manualValue[comp.Index] != "-")
+                                {
+                                    valueSetClone.Reference[comp.Index] = manualValue[comp.Index];
+                                    valueSetClone.ValueSwitch = ParameterSwitchKind.REFERENCE;
+                                    valueSetClone.Manual[comp.Index] = "-";
+                                    transaction.CreateOrUpdate(valueSetClone);
+                                    this.sessionService.Transactions.Add(transaction);
+                                    Console.WriteLine($"Moved {parameter.UserFriendlyShortName}.{comp.ShortName} = {manualValue[comp.Index]} manual value to reference value and changed switch to REFERENCE");
+                                }
+
+                        }
+
+                    }
+                }
+            }
+        }
+
+        public void SetValueSwitchToReference()
+        {
+            foreach (var parameter in this.sessionService.Iteration.Element.Where(e => this.filterService.IsFilteredIn(e))
+                .SelectMany(e => e.Parameter).OrderBy(x => x.ParameterType.ShortName))
+            {
+                if (this.filterService.IsParameterSpecifiedOrAny(parameter))
+                {
+                    var valueSet = parameter.ValueSet.FirstOrDefault();
+
+
+                    if (valueSet?.ValueSwitch != ParameterSwitchKind.REFERENCE)
+                    {
+                        var valueSetClone = valueSet.Clone(true);
+                        var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
+                        valueSetClone.ValueSwitch = ParameterSwitchKind.REFERENCE;
+                        transaction.CreateOrUpdate(valueSetClone);
+                        this.sessionService.Transactions.Add(transaction);
+
+                        Console.WriteLine($"Changed {parameter.UserFriendlyShortName}  switch to REFERENCE");
+                    }
+                }
+            }
+        }
+
+        public void SetValueSwitchToComputed()
+        {
+            foreach (var parameter in this.sessionService.Iteration.Element.Where(e => this.filterService.IsFilteredIn(e))
+                .SelectMany(e => e.Parameter).OrderBy(x => x.ParameterType.ShortName))
+            {
+                if (this.filterService.IsParameterSpecifiedOrAny(parameter))
+                {
+                    var valueSet = parameter.ValueSet.FirstOrDefault();
+
+
+                    if (valueSet?.ValueSwitch != ParameterSwitchKind.COMPUTED)
+                    {
+                        var valueSetClone = valueSet.Clone(true);
+                        var transaction = new ThingTransaction(TransactionContextResolver.ResolveContext(valueSetClone), valueSetClone);
+                        valueSetClone.ValueSwitch = ParameterSwitchKind.COMPUTED;
+                        transaction.CreateOrUpdate(valueSetClone);
+                        this.sessionService.Transactions.Add(transaction);
+
+                        Console.WriteLine($"Changed {parameter.UserFriendlyShortName}  switch to COMPUTED");
                     }
                 }
             }

@@ -151,6 +151,15 @@ namespace CDPBatchEditor.Commands
                 case CommandEnumeration.MoveReferenceValuesToManualValues:
                     this.valueSetCommand.MoveReferenceValuesToManualValues();
                     break;
+                case CommandEnumeration.MoveManualValuesToReferenceValues:
+                    this.valueSetCommand.MoveManualValuesToReferenceValues();
+                    break;
+                case CommandEnumeration.SetValueSwitchToReference:
+                    this.valueSetCommand.SetValueSwitchToReference();
+                    break;
+                case CommandEnumeration.SetValueSwitchToComputed:
+                    this.valueSetCommand.SetValueSwitchToComputed();
+                    break;
                 case CommandEnumeration.ApplyOptionDependence:
                     this.optionCommand.ApplyOrRemoveOptionDependency(false);
                     break;

@@ -33,5 +33,8 @@ namespace CDPBatchEditor.Commands.Command.Interface
         /// Move the value of reference value to manual value on value sets of parameters of specified element definition
         /// </summary>
         void MoveReferenceValuesToManualValues();
+        void MoveManualValuesToReferenceValues();
+        void SetValueSwitchToReference();
+        void SetValueSwitchToComputed();
     }
 }
