@@ -101,6 +101,12 @@ namespace CDPBatchEditor.CommandArguments.Interface
         IList<string> ElementUsageCategories { get; }
 
         /// <summary>
+        /// Gets a value indicating whether target parameter groups that are not present in the source and end up empty
+        /// should be deleted during the SyncElementDefinitions action.
+        /// </summary>
+        bool PruneParameterGroups { get; }
+
+        /// <summary>
         /// Gets or sets the short name of an element definition to be used as the top node of sub-tree filter.
         /// </summary>
         string ElementDefinition { get; }

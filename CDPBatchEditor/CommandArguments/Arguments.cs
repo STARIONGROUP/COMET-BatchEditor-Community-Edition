@@ -140,6 +140,18 @@ namespace CDPBatchEditor.CommandArguments
         public IList<string> ElementUsageCategories { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether target parameter groups that are not present in the source and end up
+        /// empty should be deleted.
+        /// </summary>
+        [Option(
+            "prune-groups",
+            Required = false,
+            Default = false,
+            HelpText = "Delete target Parameter Groups that are not present in the source model and become empty after the sync. "
+                       + "Use in conjunction with --action=SyncElementDefinitions. If not set, empty target groups are left in place.")]
+        public bool PruneParameterGroups { get; set; }
+
+        /// <summary>
         /// Gets or sets the short name of an element definition to be used as the top node of sub-tree filter.
         /// </summary>
         [Option(

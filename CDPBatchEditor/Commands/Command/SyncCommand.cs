@@ -463,19 +463,22 @@ namespace CDPBatchEditor.Commands.Command
 
             transaction.Create(elementDefinition, iterationClone);
 
+            var context = new ElementDefinitionUpdate(elementDefinition, transaction);
+            this.processedElementDefinitions[sourceElementDefinition.ShortName] = context;
+            this.changedElementDefinitionShortNames.Add(elementDefinition.ShortName);
+            this.sessionService.Transactions.Add(transaction);
+
             this.reportEntries.Add($"[CREATED] {elementDefinition.ShortName} ({elementDefinition.Name}) owner={elementDefinition.Owner?.ShortName}");
             Console.WriteLine($"Created Element Definition {elementDefinition.ShortName} in target model");
 
-            var groupMap = this.CopyParameterGroups(sourceElementDefinition, elementDefinition, transaction);
+            var copiedSourceParameters = this.SelectableParameters(sourceElementDefinition).ToList();
+            var usedRootGroups = CollectUsedRootGroups(copiedSourceParameters);
+            var groupMap = this.SyncParameterGroups(elementDefinition, context, usedRootGroups, isNewElementDefinition: true, new List<string>());
 
-            foreach (var sourceParameter in this.SelectableParameters(sourceElementDefinition))
+            foreach (var sourceParameter in copiedSourceParameters)
             {
-                this.CreateParameter(sourceParameter, elementDefinition, transaction, groupMap);
+                this.CreateParameter(sourceParameter, elementDefinition, context.Transaction, groupMap);
             }
-
-            this.processedElementDefinitions[sourceElementDefinition.ShortName] = new ElementDefinitionUpdate(elementDefinition, transaction);
-            this.changedElementDefinitionShortNames.Add(elementDefinition.ShortName);
-            this.sessionService.Transactions.Add(transaction);
         }
 
         /// <summary>
@@ -521,22 +524,36 @@ namespace CDPBatchEditor.Commands.Command
                 }
             }
 
-            Dictionary<Guid, ParameterGroup> groupMap = null;
+            var copiedSourceParameters = this.SelectableParameters(sourceElementDefinition).ToList();
+            var usedRootGroups = CollectUsedRootGroups(copiedSourceParameters);
+            var groupMap = this.SyncParameterGroups(targetElementDefinition, context, usedRootGroups, isNewElementDefinition: false, changes);
 
-            foreach (var sourceParameter in this.SelectableParameters(sourceElementDefinition))
+            foreach (var sourceParameter in copiedSourceParameters)
             {
                 var targetParameter = targetElementDefinition.Parameter.FirstOrDefault(parameter => parameter.ParameterType.Iid == sourceParameter.ParameterType.Iid);
 
                 if (targetParameter == null)
                 {
-                    groupMap ??= this.CopyParameterGroups(sourceElementDefinition, elementDefinitionClone, context.Transaction);
                     this.CreateParameter(sourceParameter, elementDefinitionClone, context.Transaction, groupMap);
                     changes.Add($"+parameter {sourceParameter.ParameterType.ShortName}");
                 }
-                else if (this.UpdateExistingParameterValues(sourceParameter, targetParameter))
+                else
                 {
-                    changes.Add($"~parameter {sourceParameter.ParameterType.ShortName} (reference value)");
+                    if (this.UpdateExistingParameterValues(sourceParameter, targetParameter))
+                    {
+                        changes.Add($"~parameter {sourceParameter.ParameterType.ShortName} (reference value)");
+                    }
+
+                    if (this.RelinkExistingParameterGroup(sourceParameter, targetParameter, groupMap, context))
+                    {
+                        changes.Add($"~parameter {sourceParameter.ParameterType.ShortName} (group)");
+                    }
                 }
+            }
+
+            if (this.commandArguments.PruneParameterGroups)
+            {
+                this.DeleteEmptyParameterGroups(targetElementDefinition, copiedSourceParameters, usedRootGroups, context, changes);
             }
 
             if (changes.Any())
@@ -596,54 +613,191 @@ namespace CDPBatchEditor.Commands.Command
         }
 
         /// <summary>
-        /// Recreates (by name) the source parameter groups under the target element definition, preserving nesting, and
-        /// returns a map from source <see cref="ParameterGroup.Iid" /> to the target <see cref="ParameterGroup" />.
+        /// Collects the distinct top-level (root) source parameter groups used by the copied parameters. Nested groups are
+        /// flattened: a parameter in a nested group is represented by the root (top-most) ancestor of that group.
         /// </summary>
-        /// <param name="sourceElementDefinition">The source <see cref="ElementDefinition" />.</param>
-        /// <param name="targetElementDefinition">The target <see cref="ElementDefinition" /> (clone or new instance).</param>
-        /// <param name="transaction">The <see cref="ThingTransaction" /> holding the changes.</param>
-        /// <returns>A map from source parameter group iid to the corresponding target parameter group.</returns>
-        private Dictionary<Guid, ParameterGroup> CopyParameterGroups(ElementDefinition sourceElementDefinition, ElementDefinition targetElementDefinition, ThingTransaction transaction)
+        /// <param name="copiedSourceParameters">The source parameters being copied to the target.</param>
+        /// <returns>The distinct used root source <see cref="ParameterGroup" />s.</returns>
+        private static List<ParameterGroup> CollectUsedRootGroups(IEnumerable<Parameter> copiedSourceParameters)
+        {
+            var roots = new Dictionary<Guid, ParameterGroup>();
+
+            foreach (var sourceParameter in copiedSourceParameters)
+            {
+                if (sourceParameter.Group != null)
+                {
+                    var root = RootOf(sourceParameter.Group);
+                    roots[root.Iid] = root;
+                }
+            }
+
+            return roots.Values.ToList();
+        }
+
+        /// <summary>
+        /// Returns the top-most (root) ancestor of the given parameter group by walking the containing-group chain.
+        /// </summary>
+        /// <param name="parameterGroup">The <see cref="ParameterGroup" />.</param>
+        /// <returns>The root <see cref="ParameterGroup" />.</returns>
+        private static ParameterGroup RootOf(ParameterGroup parameterGroup)
+        {
+            var current = parameterGroup;
+            var visited = new HashSet<Guid>();
+
+            while (current.ContainingGroup != null && visited.Add(current.Iid))
+            {
+                current = current.ContainingGroup;
+            }
+
+            return current;
+        }
+
+        /// <summary>
+        /// Ensures a matching target parameter group exists for each used root source group, matched by
+        /// <see cref="ParameterGroup.Name" /> within the element definition and created at the top level (no
+        /// <see cref="ParameterGroup.ContainingGroup" />) when missing. Returns a map from the source root group's
+        /// <see cref="ParameterGroup.Iid" /> to the corresponding target <see cref="ParameterGroup" />.
+        /// </summary>
+        /// <param name="targetElementDefinition">The target element definition to look existing groups up in.</param>
+        /// <param name="context">The target element definition update (created instance or update clone, lazy transaction).</param>
+        /// <param name="usedRootGroups">The used root source groups.</param>
+        /// <param name="isNewElementDefinition">True when the target element definition is being created (no existing groups).</param>
+        /// <param name="changes">The running list of change descriptions for the report.</param>
+        /// <returns>A map from source root parameter group iid to the corresponding target parameter group.</returns>
+        private Dictionary<Guid, ParameterGroup> SyncParameterGroups(
+            ElementDefinition targetElementDefinition,
+            ElementDefinitionUpdate context,
+            List<ParameterGroup> usedRootGroups,
+            bool isNewElementDefinition,
+            List<string> changes)
         {
             var map = new Dictionary<Guid, ParameterGroup>();
 
-            // Order parents before children so a containing group exists before it is referenced.
-            foreach (var sourceGroup in sourceElementDefinition.ParameterGroup.OrderBy(this.Depth))
+            foreach (var rootGroup in usedRootGroups)
             {
-                var targetGroup = targetElementDefinition.ParameterGroup.FirstOrDefault(group => group.Name == sourceGroup.Name);
+                var targetGroup = isNewElementDefinition
+                    ? null
+                    : targetElementDefinition.ParameterGroup.FirstOrDefault(group => group.Name == rootGroup.Name);
 
                 if (targetGroup == null)
                 {
-                    targetGroup = new ParameterGroup(Guid.NewGuid(), this.sessionService.Cache, this.commandArguments.ServerUri) { Name = sourceGroup.Name };
-                    transaction.Create(targetGroup, targetElementDefinition);
+                    // Created at the top level; existing groups (matched by Name) keep their current nesting unchanged.
+                    targetGroup = new ParameterGroup(Guid.NewGuid(), this.sessionService.Cache, this.commandArguments.ServerUri) { Name = rootGroup.Name };
+                    context.Transaction.Create(targetGroup, context.Target);
+                    changes.Add($"+group {rootGroup.Name}");
                 }
 
-                if (sourceGroup.ContainingGroup != null && map.TryGetValue(sourceGroup.ContainingGroup.Iid, out var targetContainingGroup))
-                {
-                    targetGroup.ContainingGroup = targetContainingGroup;
-                }
-
-                map[sourceGroup.Iid] = targetGroup;
+                map[rootGroup.Iid] = targetGroup;
             }
 
             return map;
         }
 
         /// <summary>
-        /// Computes the nesting depth of a parameter group (the number of containing groups above it).
+        /// Resolves the target parameter group a source parameter should be linked to: the target group matching the root
+        /// (top-level) ancestor of the source parameter's group, or null when the source parameter is ungrouped.
         /// </summary>
-        /// <param name="parameterGroup">The <see cref="ParameterGroup" />.</param>
-        /// <returns>The nesting depth.</returns>
-        private int Depth(ParameterGroup parameterGroup)
+        /// <param name="sourceParameter">The source <see cref="Parameter" />.</param>
+        /// <param name="rootGroupMap">The map from source root group iid to target group.</param>
+        /// <returns>The target <see cref="ParameterGroup" />, or null.</returns>
+        private static ParameterGroup ResolveTargetGroup(Parameter sourceParameter, Dictionary<Guid, ParameterGroup> rootGroupMap)
         {
-            var depth = 0;
-
-            for (var current = parameterGroup.ContainingGroup; current != null; current = current.ContainingGroup)
+            if (sourceParameter.Group == null)
             {
-                depth++;
+                return null;
             }
 
-            return depth;
+            return rootGroupMap.TryGetValue(RootOf(sourceParameter.Group).Iid, out var targetGroup) ? targetGroup : null;
+        }
+
+        /// <summary>
+        /// Re-links an existing target parameter to the top-level group its source counterpart resolves to (matched by
+        /// Name), including removing the group when the source parameter is ungrouped. Returns true when the link changed.
+        /// </summary>
+        /// <param name="sourceParameter">The source <see cref="Parameter" />.</param>
+        /// <param name="targetParameter">The existing target <see cref="Parameter" />.</param>
+        /// <param name="rootGroupMap">The map from source root group iid to target group.</param>
+        /// <param name="context">The target element definition update (lazy transaction).</param>
+        /// <returns>True when the parameter's group link was changed.</returns>
+        private bool RelinkExistingParameterGroup(Parameter sourceParameter, Parameter targetParameter, Dictionary<Guid, ParameterGroup> rootGroupMap, ElementDefinitionUpdate context)
+        {
+            var desiredGroup = ResolveTargetGroup(sourceParameter, rootGroupMap);
+
+            if (targetParameter.Group?.Name == desiredGroup?.Name)
+            {
+                return false;
+            }
+
+            var parameterClone = targetParameter.Clone(false);
+            parameterClone.Group = desiredGroup;
+            context.Transaction.CreateOrUpdate(parameterClone);
+            return true;
+        }
+
+        /// <summary>
+        /// Deletes target parameter groups that are not one of the copied root groups and, after the parameters have been
+        /// re-linked, have no parameters and no child groups left. Deletion cascades upwards (a parent is removed once its
+        /// last child is removed).
+        /// </summary>
+        /// <param name="targetElementDefinition">The existing target <see cref="ElementDefinition" />.</param>
+        /// <param name="copiedSourceParameters">The source parameters being copied.</param>
+        /// <param name="usedRootGroups">The used root source groups (the groups actually copied).</param>
+        /// <param name="context">The target element definition update (lazy transaction).</param>
+        /// <param name="changes">The running list of change descriptions for the report.</param>
+        private void DeleteEmptyParameterGroups(
+            ElementDefinition targetElementDefinition,
+            IReadOnlyList<Parameter> copiedSourceParameters,
+            List<ParameterGroup> usedRootGroups,
+            ElementDefinitionUpdate context,
+            List<string> changes)
+        {
+            var copiedRootGroupNames = new HashSet<string>(usedRootGroups.Select(group => group.Name).Where(name => !string.IsNullOrEmpty(name)));
+
+            var copiedSourceParameterByType = copiedSourceParameters
+                .GroupBy(parameter => parameter.ParameterType.Iid)
+                .ToDictionary(group => group.Key, group => group.First());
+
+            // The group each target parameter ends up in: copied parameters land in their source group's root, others stay put.
+            string FinalParameterGroupName(Parameter targetParameter)
+            {
+                if (copiedSourceParameterByType.TryGetValue(targetParameter.ParameterType.Iid, out var sourceParameter))
+                {
+                    return sourceParameter.Group != null ? RootOf(sourceParameter.Group).Name : null;
+                }
+
+                return targetParameter.Group?.Name;
+            }
+
+            var referencedByParameter = new HashSet<string>(
+                targetElementDefinition.Parameter.Select(FinalParameterGroupName).Where(name => !string.IsNullOrEmpty(name)));
+
+            var present = targetElementDefinition.ParameterGroup.ToList();
+            bool removedAny;
+
+            do
+            {
+                removedAny = false;
+
+                // Existing group nesting is never changed, so a group is "referenced as parent" by its current children.
+                var referencedAsParent = new HashSet<string>(present.Select(group => group.ContainingGroup?.Name).Where(name => !string.IsNullOrEmpty(name)));
+
+                foreach (var group in present.ToList())
+                {
+                    if (!copiedRootGroupNames.Contains(group.Name) && !referencedByParameter.Contains(group.Name) && !referencedAsParent.Contains(group.Name))
+                    {
+                        // Delete requires the thing to be a clone rooted in its own transaction (see ParameterCommand.Remove).
+                        var groupClone = group.Clone(false);
+                        var deleteTransaction = new ThingTransaction(TransactionContextResolver.ResolveContext(groupClone), groupClone);
+                        deleteTransaction.Delete(group, context.Target);
+                        this.sessionService.Transactions.Add(deleteTransaction);
+
+                        changes.Add($"-group {group.Name}");
+                        present.Remove(group);
+                        removedAny = true;
+                    }
+                }
+            }
+            while (removedAny);
         }
 
         /// <summary>
@@ -653,20 +807,16 @@ namespace CDPBatchEditor.Commands.Command
         /// <param name="sourceParameter">The source <see cref="Parameter" />.</param>
         /// <param name="targetElementDefinition">The target <see cref="ElementDefinition" /> (clone or new instance).</param>
         /// <param name="transaction">The <see cref="ThingTransaction" /> holding the changes.</param>
-        /// <param name="groupMap">The map from source to target parameter groups.</param>
-        private void CreateParameter(Parameter sourceParameter, ElementDefinition targetElementDefinition, ThingTransaction transaction, Dictionary<Guid, ParameterGroup> groupMap)
+        /// <param name="rootGroupMap">The map from source root group iid to target parameter group.</param>
+        private void CreateParameter(Parameter sourceParameter, ElementDefinition targetElementDefinition, ThingTransaction transaction, Dictionary<Guid, ParameterGroup> rootGroupMap)
         {
             var parameter = new Parameter(Guid.NewGuid(), this.sessionService.Cache, this.commandArguments.ServerUri)
             {
                 ParameterType = sourceParameter.ParameterType,
                 Scale = sourceParameter.Scale,
-                Owner = sourceParameter.Owner
+                Owner = sourceParameter.Owner,
+                Group = ResolveTargetGroup(sourceParameter, rootGroupMap)
             };
-
-            if (sourceParameter.Group != null && groupMap.TryGetValue(sourceParameter.Group.Iid, out var targetGroup))
-            {
-                parameter.Group = targetGroup;
-            }
 
             transaction.Create(parameter, targetElementDefinition);
             this.createdParameters[(targetElementDefinition.ShortName, parameter.ParameterType.Iid)] = parameter;

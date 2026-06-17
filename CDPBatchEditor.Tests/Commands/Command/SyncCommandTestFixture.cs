@@ -176,6 +176,84 @@ namespace CDPBatchEditor.Tests.Commands.Command
         }
 
         [Test]
+        public void VerifyNestedGroupsAreFlattenedToTopLevelOnCreate()
+        {
+            this.BuildAndRun(string.Empty);
+
+            var createdGroups = this.transactions.SelectMany(t => t.AddedThing).OfType<ParameterGroup>().ToList();
+
+            var gA = createdGroups.FirstOrDefault(g => g.Name == "gA");
+            Assert.That(gA, Is.Not.Null);
+            Assert.That(gA.ContainingGroup, Is.Null, "The copied group must be created at the top level.");
+            Assert.That(createdGroups.Any(g => g.Name == "gB" || g.Name == "gC"), Is.False, "Nested sub-groups must not be copied.");
+            Assert.That(createdGroups.Any(g => g.Name == "gUnused"), Is.False, "Unused groups must not be copied.");
+
+            var createdMass = this.transactions.SelectMany(t => t.AddedThing).OfType<Parameter>()
+                .FirstOrDefault(p => p.ParameterType.ShortName == "mass" && (p.Container as ElementDefinition)?.ShortName == "grp");
+
+            Assert.That(createdMass, Is.Not.Null);
+            Assert.That(createdMass.Group?.Name, Is.EqualTo("gA"), "A deeply nested parameter must be placed in the top-level group.");
+        }
+
+        [Test]
+        public void VerifyNestedSourceGroupsFlattenedWhenRelinkingExistingParameters()
+        {
+            this.BuildAndRun(string.Empty);
+
+            // Only the top-level "fA" group is created for grpFlat (no nesting).
+            var createdGroups = this.transactions.SelectMany(t => t.AddedThing).OfType<ParameterGroup>()
+                .Where(g => (g.Container as ElementDefinition)?.ShortName == "grpFlat").ToList();
+
+            Assert.That(createdGroups.Select(g => g.Name), Is.EquivalentTo(new[] { "fA" }));
+            Assert.That(createdGroups[0].ContainingGroup, Is.Null);
+
+            // Both existing parameters (one from a deeply nested source group) are re-linked to the top-level "fA".
+            var updated = this.transactions.SelectMany(t => t.UpdatedThing.Values).OfType<Parameter>()
+                .Where(p => (p.Container as ElementDefinition)?.ShortName == "grpFlat").ToList();
+
+            Assert.That(updated.FirstOrDefault(p => p.ParameterType.ShortName == "mass")?.Group?.Name, Is.EqualTo("fA"));
+            Assert.That(updated.FirstOrDefault(p => p.ParameterType.ShortName == "power")?.Group?.Name, Is.EqualTo("fA"));
+        }
+
+        [Test]
+        public void VerifyParameterGroupsRelinkedAndEmptyGroupDeletedOnUpdate()
+        {
+            this.BuildAndRun("--prune-groups");
+
+            // "Old" exists only in the target and becomes empty after re-linking, so with --prune-groups it is deleted.
+            var deletedGroups = this.transactions.SelectMany(t => t.DeletedThing).OfType<ParameterGroup>().Select(g => g.Name).ToList();
+            Assert.That(deletedGroups, Does.Contain("Old"));
+
+            var updatedParameters = this.transactions.SelectMany(t => t.UpdatedThing.Values).OfType<Parameter>()
+                .Where(p => (p.Container as ElementDefinition)?.ShortName == "grpUpd").ToList();
+
+            var mass = updatedParameters.FirstOrDefault(p => p.ParameterType.ShortName == "mass");
+            Assert.That(mass, Is.Not.Null);
+            Assert.That(mass.Group?.Name, Is.EqualTo("B"), "The moved parameter must be re-linked to the source group.");
+
+            var power = updatedParameters.FirstOrDefault(p => p.ParameterType.ShortName == "power");
+            Assert.That(power, Is.Not.Null);
+            Assert.That(power.Group, Is.Null, "An ungrouped source parameter must clear the target group link.");
+        }
+
+        [Test]
+        public void VerifyEmptyGroupIsKeptWithoutPruneOptionButParametersStillRelinked()
+        {
+            this.BuildAndRun(string.Empty);
+
+            // Without --prune-groups the empty target-only group must be left in place.
+            var deletedGroups = this.transactions.SelectMany(t => t.DeletedThing).OfType<ParameterGroup>().Select(g => g.Name).ToList();
+            Assert.That(deletedGroups, Does.Not.Contain("Old"));
+
+            // Re-linking still happens regardless of the prune option.
+            var mass = this.transactions.SelectMany(t => t.UpdatedThing.Values).OfType<Parameter>()
+                .FirstOrDefault(p => p.ParameterType.ShortName == "mass" && (p.Container as ElementDefinition)?.ShortName == "grpUpd");
+
+            Assert.That(mass, Is.Not.Null);
+            Assert.That(mass.Group?.Name, Is.EqualTo("B"));
+        }
+
+        [Test]
         public void VerifyReportRecordsParameterValueChanges()
         {
             this.BuildAndRun(string.Empty);
@@ -368,6 +446,28 @@ namespace CDPBatchEditor.Tests.Commands.Command
             var stableParent = this.CreateElementDefinition("stableParent", "Stable Parent", this.sourceIteration, this.equipmentCategory);
             this.AddUsage(stableParent, stableChild, "uStable", this.batteryCategory);
 
+            // Nested groups are flattened: only the top-level (root) group is copied. gC -> gB -> gA; gUnused is unused.
+            var grp = this.CreateElementDefinition("grp", "Grp", this.sourceIteration);
+            var gA = this.AddParameterGroup(grp, "gA", null);
+            var gB = this.AddParameterGroup(grp, "gB", gA);
+            var gC = this.AddParameterGroup(grp, "gC", gB);
+            this.AddParameterGroup(grp, "gUnused", null);
+            this.AddParameter(grp, this.massParameterType, "1").Group = gC;
+
+            // Flatten on update: source params are nested fA/fB/fC; target params exist ungrouped -> all land in fA.
+            var grpFlatSource = this.CreateElementDefinition("grpFlat", "GrpFlat", this.sourceIteration);
+            var fA = this.AddParameterGroup(grpFlatSource, "fA", null);
+            var fB = this.AddParameterGroup(grpFlatSource, "fB", fA);
+            var fC = this.AddParameterGroup(grpFlatSource, "fC", fB);
+            this.AddParameter(grpFlatSource, this.massParameterType, "1").Group = fA;
+            this.AddParameter(grpFlatSource, this.powerParameterType, "2").Group = fC;
+
+            // Group re-link and empty-group deletion on update: source has top-level group "B" only.
+            var grpUpdSource = this.CreateElementDefinition("grpUpd", "GrpUpd", this.sourceIteration);
+            var sourceB = this.AddParameterGroup(grpUpdSource, "B", null);
+            this.AddParameter(grpUpdSource, this.massParameterType, "1").Group = sourceB;
+            this.AddParameter(grpUpdSource, this.powerParameterType, "2");
+
             this.AddToCache(this.sourceIteration);
         }
 
@@ -404,6 +504,18 @@ namespace CDPBatchEditor.Tests.Commands.Command
             this.AddParameter(stableChild, this.massParameterType, "5", "5");
             var stableParent = this.CreateElementDefinition("stableParent", "Stable Parent", this.targetIteration, this.equipmentCategory);
             this.AddUsage(stableParent, stableChild, "uStable", this.batteryCategory);
+
+            // Target counterpart for the flatten-on-update scenario: both parameters exist ungrouped.
+            var grpFlatTarget = this.CreateElementDefinition("grpFlat", "GrpFlat", this.targetIteration);
+            this.AddParameter(grpFlatTarget, this.massParameterType, "1", "1");
+            this.AddParameter(grpFlatTarget, this.powerParameterType, "2", "2");
+
+            // Target counterpart for the group-update scenario: mass is in "Old", power is in "Old"; "Old" is not in source.
+            var grpUpdTarget = this.CreateElementDefinition("grpUpd", "GrpUpd", this.targetIteration);
+            this.AddParameterGroup(grpUpdTarget, "B", null);
+            var targetOld = this.AddParameterGroup(grpUpdTarget, "Old", null);
+            this.AddParameter(grpUpdTarget, this.massParameterType, "1", "1").Group = targetOld;
+            this.AddParameter(grpUpdTarget, this.powerParameterType, "2", "2").Group = targetOld;
 
             this.CreateElementDefinition("dupTgt", "Dup Target A", this.targetIteration);
             this.CreateElementDefinition("dupTgt", "Dup Target B", this.targetIteration);
@@ -495,6 +607,20 @@ namespace CDPBatchEditor.Tests.Commands.Command
             return parameter;
         }
 
+        private ParameterGroup AddParameterGroup(ElementDefinition elementDefinition, string name, ParameterGroup containingGroup)
+        {
+            var parameterGroup = new ParameterGroup(Guid.NewGuid(), this.assembler.Cache, this.uri)
+            {
+                Name = name,
+                ContainingGroup = containingGroup,
+                Container = elementDefinition
+            };
+
+            elementDefinition.ParameterGroup.Add(parameterGroup);
+
+            return parameterGroup;
+        }
+
         private ElementUsage AddUsage(ElementDefinition primary, ElementDefinition referenced, string shortName, params Category[] categories)
         {
             var usage = new ElementUsage(Guid.NewGuid(), this.assembler.Cache, this.uri)
@@ -544,6 +670,11 @@ namespace CDPBatchEditor.Tests.Commands.Command
             foreach (var elementDefinition in iteration.Element)
             {
                 this.assembler.Cache.TryAdd(new CacheKey(elementDefinition.Iid, iteration.Iid), new Lazy<CDP4Common.CommonData.Thing>(() => elementDefinition));
+
+                foreach (var parameterGroup in elementDefinition.ParameterGroup)
+                {
+                    this.assembler.Cache.TryAdd(new CacheKey(parameterGroup.Iid, iteration.Iid), new Lazy<CDP4Common.CommonData.Thing>(() => parameterGroup));
+                }
 
                 foreach (var parameter in elementDefinition.Parameter)
                 {
