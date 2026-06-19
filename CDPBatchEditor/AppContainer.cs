@@ -70,6 +70,7 @@ namespace CDPBatchEditor
             containerBuilder.RegisterType<ScaleCommand>().As<IScaleCommand>();
             containerBuilder.RegisterType<OptionCommand>().As<IOptionCommand>();
             containerBuilder.RegisterType<SyncCommand>().As<ISyncCommand>();
+            containerBuilder.RegisterType<ElementUsageCommand>().As<IElementUsageCommand>();
             containerBuilder.RegisterType<ReportGenerator>().As<IReportGenerator>();
             containerBuilder.RegisterType<CDPMessageBus>().As<ICDPMessageBus>().SingleInstance();
 

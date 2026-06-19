@@ -86,6 +86,11 @@ namespace CDPBatchEditor.Commands
         private readonly ISyncCommand syncCommand;
 
         /// <summary>
+        /// The <see cref="IElementUsageCommand" /> command instance
+        /// </summary>
+        private readonly IElementUsageCommand elementUsageCommand;
+
+        /// <summary>
         /// The <see cref="IOverrideCommand" /> command instance
         /// </summary>
         private readonly IOverrideCommand overrideCommand;
@@ -108,6 +113,7 @@ namespace CDPBatchEditor.Commands
         /// <param name="domainCommand">the domain command</param>
         /// <param name="valueSetCommand">the value set command</param>
         /// <param name="syncCommand">the sync command</param>
+        /// <param name="elementUsageCommand">the element usage command</param>
         /// <param name="reportGenerator">the reportgernerator command</param>
         public CommandDispatcher(
             ICommandArguments commandArguments,
@@ -121,6 +127,7 @@ namespace CDPBatchEditor.Commands
             IDomainCommand domainCommand,
             IValueSetCommand valueSetCommand,
             ISyncCommand syncCommand,
+            IElementUsageCommand elementUsageCommand,
             IReportGenerator reportGenerator)
         {
             this.commandArguments = commandArguments;
@@ -134,6 +141,7 @@ namespace CDPBatchEditor.Commands
             this.domainCommand = domainCommand;
             this.valueSetCommand = valueSetCommand;
             this.syncCommand = syncCommand;
+            this.elementUsageCommand = elementUsageCommand;
             this.reportGenerator = reportGenerator;
         }
 
@@ -197,6 +205,9 @@ namespace CDPBatchEditor.Commands
                     break;
                 case CommandEnumeration.SyncElementDefinitions:
                     this.syncCommand.Sync();
+                    break;
+                case CommandEnumeration.SyncElementUsageNames:
+                    this.elementUsageCommand.SyncNames();
                     break;
                 case CommandEnumeration.Unspecified:
                     break;

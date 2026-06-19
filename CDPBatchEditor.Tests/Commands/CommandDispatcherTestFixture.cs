@@ -53,13 +53,14 @@ namespace CDPBatchEditor.Tests.Commands
             this.domainCommand = new Mock<IDomainCommand>();
             this.valueSetCommand = new Mock<IValueSetCommand>();
             this.syncCommand = new Mock<ISyncCommand>();
+            this.elementUsageCommand = new Mock<IElementUsageCommand>();
             this.reportGenerator = new Mock<IReportGenerator>();
 
             this.commandArguments.Setup(x => x.Report).Returns(true);
 
             this.commandDispatcher = new CommandDispatcher(
                 this.commandArguments.Object, this.parameterCommand.Object, this.requirementSimpleParameterValueCommand.Object, this.subscriptionCommand.Object, this.overrideCommand.Object, this.optionCommand.Object,
-                this.scaleCommand.Object, this.stateCommand.Object, this.domainCommand.Object, this.valueSetCommand.Object, this.syncCommand.Object, this.reportGenerator.Object);
+                this.scaleCommand.Object, this.stateCommand.Object, this.domainCommand.Object, this.valueSetCommand.Object, this.syncCommand.Object, this.elementUsageCommand.Object, this.reportGenerator.Object);
         }
 
         private Mock<ICommandArguments> commandArguments;
@@ -72,6 +73,7 @@ namespace CDPBatchEditor.Tests.Commands
         private Mock<IDomainCommand> domainCommand;
         private Mock<IValueSetCommand> valueSetCommand;
         private Mock<ISyncCommand> syncCommand;
+        private Mock<IElementUsageCommand> elementUsageCommand;
         private Mock<IReportGenerator> reportGenerator;
         private Mock<IOverrideCommand> overrideCommand;
         private CommandDispatcher commandDispatcher;
@@ -112,6 +114,7 @@ namespace CDPBatchEditor.Tests.Commands
             this.scaleCommand.Verify(x => x.AssignMeasurementScale(), Times.Once);
             this.scaleCommand.Verify(x => x.StandardizeDimensionsInMillimetre(), Times.Once);
             this.syncCommand.Verify(x => x.Sync(), Times.Once);
+            this.elementUsageCommand.Verify(x => x.SyncNames(), Times.Once);
 
             // SyncElementDefinitions writes its own copy report, so the CSV report generator is not invoked for it.
             this.reportGenerator.Verify(x => x.ParametersToCsv(), Times.Exactly(callCount - 1));

@@ -77,7 +77,8 @@ namespace CDPBatchEditor.CommandArguments
                        + "SetShapeScaleMm,"
                        + "SetSubscriptionSwitch,"
                        + "Subscribe,"
-                       + "SyncElementDefinitions")]
+                       + "SyncElementDefinitions,"
+                       + "SyncElementUsageNames")]
         public CommandEnumeration Command { get; set; }
 
         /// <summary>

@@ -32,8 +32,8 @@ report of affected parameters.
     (a big `switch`). This is the routing hub.
   - `Command/` — one class per area of behaviour (`ParameterCommand`, `OverrideCommand`,
     `OptionCommand`, `StateCommand`, `DomainCommand`, `ScaleCommand`, `SubscriptionCommand`,
-    `ValueSetCommand`, `RequirementSimpleParameterValueCommand`, `SyncCommand`), each with an `I*`
-    interface in `Command/Interface/`.
+    `ValueSetCommand`, `RequirementSimpleParameterValueCommand`, `SyncCommand`, `ElementUsageCommand`), each with
+    an `I*` interface in `Command/Interface/`.
   - `ReportGenerator.cs` — CSV report of affected parameters.
 - `Services/` — `SessionService` (owns the CDP4 `ISession`, open/close/save), `FilterService`
   (selects the elements/parameters a command operates on), `CsvFileWriter`, each with an

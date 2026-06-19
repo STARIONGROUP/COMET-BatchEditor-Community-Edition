@@ -116,3 +116,19 @@ A. Parameters (new and existing) are re-linked to the correct top-level group. B
 place; add `--prune-groups` to also delete target groups that are not among the copied root groups and end up empty.
 
     -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT --prune-groups
+
+)## SyncElementUsageNames
+
+Overwrites every ElementUsage's `ShortName` and `Name` with the `ShortName` and `Name` of the ElementDefinition it
+references, so a usage always carries the current names of its definition. Only usages whose referenced ElementDefinition
+passes the active filters are processed: `--element-definition` (restrict to a definition and its subtree), `--categories`
+(definition must be a member of one of the given categories) and `--included-owners`/`--excluded-owners` (filter on the
+referenced definition's owner). A usage is only rewritten when its short name or name actually differs, so nothing is
+written or reported for usages that already match. Use `--dry` to preview. A `LastElementUsageNameSyncReport.txt` file
+(overwritten each run) lists every synchronised usage.
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementUsageNames -m LOFT
+
+Restrict to one decomposition subtree and preview with a dry run:
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementUsageNames -m LOFT --element-definition Satellite --dry
