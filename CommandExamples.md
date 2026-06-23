@@ -117,7 +117,7 @@ place; add `--prune-groups` to also delete target groups that are not among the 
 
     -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT --prune-groups
 
-)## SyncElementUsageNames
+## SyncElementUsageNames
 
 Overwrites every ElementUsage's `ShortName` and `Name` with the `ShortName` and `Name` of the ElementDefinition it
 references, so a usage always carries the current names of its definition. Only usages whose referenced ElementDefinition
