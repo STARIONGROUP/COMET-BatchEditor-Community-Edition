@@ -118,6 +118,21 @@ namespace CDPBatchEditor.CommandArguments
         /// Subscribe to parameters #
         /// <example>action=Subscribe --parameters=height,length,mass --domain=Thermal</example>
         /// </summary>
-        Subscribe
+        Subscribe,
+
+        /// <summary>
+        /// Copy or update <see cref="CDP4Common.EngineeringModelData.ElementDefinition" />s, their parameters,
+        /// parameter values and parameter groups from a source engineering model into a target engineering model #
+        /// <example>action=SyncElementDefinitions --source-model=SRC --target-model=TGT</example>
+        /// </summary>
+        SyncElementDefinitions,
+
+        /// <summary>
+        /// Synchronise (overwrite) every <see cref="CDP4Common.EngineeringModelData.ElementUsage" />'s short name and
+        /// name with the short name and name of the <see cref="CDP4Common.EngineeringModelData.ElementDefinition" /> it
+        /// references #
+        /// <example>action=SyncElementUsageNames -m LOFT</example>
+        /// </summary>
+        SyncElementUsageNames
     }
 }

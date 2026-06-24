@@ -84,3 +84,51 @@
 
 ## RemoveRequirementParameter
     -s http://localhost:5000 -u admin -p pass --action RemoveRequirementParameters -m LOFT --parameters l --requirements-specification ReqSpec1 --domain SYS
+
+## SyncElementDefinitions (copy or update)
+
+Copies or updates ElementDefinitions, their Parameters, parameter values and parameter groups from a source model
+(`--source-model`) into a target model (`--target-model`). ElementDefinitions are matched by ShortName; a ShortName
+that occurs more than once in either model is skipped. The source published value is written as the target reference
+value; the value switch is set to REFERENCE only when a parameter is first copied (never changed on an update), and an
+existing value is overwritten only when the source published value differs and is not `-`. Owners are written only when
+a new ElementDefinition or Parameter is created (never updated). Only ParameterTypes and Categories reachable through the
+target model's chain of reference data libraries are copied. Nothing is written or reported for things that did not
+actually change. A `LastSyncReport.txt` file (overwritten each run) lists every copied/updated ElementDefinition, the
+parameter value changes, and any exclusions or skips. `-m/--model` is not used for this action.
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT
+
+Restrict to certain categories and parameters, and preview with a dry run:
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT --categories equipment --parameters mass,power --dry
+
+Also pull in child Element Usages (and their referenced Element Definitions and Parameter Overrides) when the usage is a
+member of one of the element usage categories. A usage qualifies on its effective categories (its own categories combined
+with those of its referenced Element Definition). This descends recursively through the decomposition, so a nested
+A -> B -> C tree is reproduced with each usage nested under the correct parent.
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT --categories equipment --element-usage-categories battery,sensor
+
+Parameter Groups are flattened and matched by Name within the Element Definition: only the top-level (root) group of each
+copied parameter is copied to the target, and a parameter nested in a source group A/B/C is placed in the top-level group
+A. Parameters (new and existing) are re-linked to the correct top-level group. By default empty target groups are left in
+place; add `--prune-groups` to also delete target groups that are not among the copied root groups and end up empty.
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementDefinitions --source-model SRC --target-model TGT --prune-groups
+
+## SyncElementUsageNames
+
+Overwrites every ElementUsage's `ShortName` and `Name` with the `ShortName` and `Name` of the ElementDefinition it
+references, so a usage always carries the current names of its definition. Only usages whose referenced ElementDefinition
+passes the active filters are processed: `--element-definition` (restrict to a definition and its subtree), `--categories`
+(definition must be a member of one of the given categories) and `--included-owners`/`--excluded-owners` (filter on the
+referenced definition's owner). A usage is only rewritten when its short name or name actually differs, so nothing is
+written or reported for usages that already match. Use `--dry` to preview. A `LastElementUsageNameSyncReport.txt` file
+(overwritten each run) lists every synchronised usage.
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementUsageNames -m LOFT
+
+Restrict to one decomposition subtree and preview with a dry run:
+
+    -s http://localhost:5000 -u admin -p pass --action SyncElementUsageNames -m LOFT --element-definition Satellite --dry

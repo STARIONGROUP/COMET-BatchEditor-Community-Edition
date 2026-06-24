@@ -11,10 +11,12 @@
         <ToolCommandName>cdp4-comet-be</ToolCommandName>
         <PackageOutputPath>./nupkg</PackageOutputPath>
         <RootNamespace>CDPBatchEditor</RootNamespace>
-        <Version>4.2.0</Version>
+        <Version>5.0.0</Version>
         <PackageIcon>cdp4-icon.png</PackageIcon>
         <PackageReleaseNotes>
-            [Update] Starion Group
+            - [Upgrade] Net 10
+            - [Upgrade] COMET SDK => 30.1.1
+            - [Add] SyncElementDefinitions option
         </PackageReleaseNotes>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>

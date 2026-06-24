@@ -45,6 +45,18 @@ namespace CDPBatchEditor.CommandArguments.Interface
         string EngineeringModel { get; }
 
         /// <summary>
+        /// Gets or sets the short name of the source engineering model to copy Element Definitions from.
+        /// <code>longName = 'source-model'</code>
+        /// </summary>
+        string SourceModel { get; }
+
+        /// <summary>
+        /// Gets or sets the short name of the target engineering model to copy or update Element Definitions into.
+        /// <code>longName = 'target-model'</code>
+        /// </summary>
+        string TargetModel { get; }
+
+        /// <summary>
         /// Gets or sets the user name
         /// <code>shortname = 'u' longName = 'user'</code>
         /// </summary>
@@ -81,6 +93,18 @@ namespace CDPBatchEditor.CommandArguments.Interface
         /// Gets or sets a list of short names of categories to be used as a filter.
         /// </summary>
         IList<string> FilteredCategories { get; }
+
+        /// <summary>
+        /// Gets or sets a list of short names of element usage categories used to also pull in child element usages
+        /// during the SyncElementDefinitions action.
+        /// </summary>
+        IList<string> ElementUsageCategories { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether target parameter groups that are not present in the source and end up empty
+        /// should be deleted during the SyncElementDefinitions action.
+        /// </summary>
+        bool PruneParameterGroups { get; }
 
         /// <summary>
         /// Gets or sets the short name of an element definition to be used as the top node of sub-tree filter.

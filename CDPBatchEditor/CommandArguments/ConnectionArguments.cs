@@ -45,7 +45,8 @@ namespace CDPBatchEditor.CommandArguments
         /// Gets or sets the short name of the engineering model to edit.
         /// <code>shortname = 'm' longName = 'model'</code>
         /// </summary>
-        [Option('m', "model", Required = true, HelpText = "Short name of the engineering model to process. Asterisk means: process all engineering models.")]
+        [Option('m', "model", Required = false, HelpText = "Short name of the engineering model to process. Asterisk means: process all engineering models. "
+                                                           + "Required for every action except SyncElementDefinitions, which uses --source-model and --target-model instead.")]
         public string EngineeringModel { get; set; }
 
         /// <summary>

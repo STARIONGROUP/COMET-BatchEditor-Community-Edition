@@ -40,6 +40,7 @@ namespace CDPBatchEditor.Services
 
     using CDP4ServicesDal;
 
+    using CDPBatchEditor.CommandArguments;
     using CDPBatchEditor.CommandArguments.Interface;
     using CDPBatchEditor.Extensions;
     using CDPBatchEditor.Services.Interfaces;
@@ -110,6 +111,16 @@ namespace CDPBatchEditor.Services
         public Iteration Iteration { get; private set; }
 
         /// <summary>
+        /// Gets or sets the source <see cref="Iteration" /> used by the SyncElementDefinitions action
+        /// </summary>
+        public Iteration SourceIteration { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the target <see cref="Iteration" /> used by the SyncElementDefinitions action
+        /// </summary>
+        public Iteration TargetIteration { get; private set; }
+
+        /// <summary>
         /// Gets the cache of the current <see cref="ISession" />
         /// </summary>
         [ExcludeFromCodeCoverage]
@@ -144,10 +155,73 @@ namespace CDPBatchEditor.Services
             this.Session ??= new Session(dal, this.credentials, this.messageBus);
             this.Session.Open().GetAwaiter().GetResult();
 
-            if (this.SetProperties())
+            if (this.commandArguments.Command == CommandEnumeration.SyncElementDefinitions)
+            {
+                this.SiteDirectory = this.Session.RetrieveSiteDirectory();
+
+                if (this.IsSessionOpen() && this.ReadSourceAndTargetModels())
+                {
+                    this.filterService.ProcessFilters(this.TargetIteration, this.SiteDirectory.Domain);
+                }
+            }
+            else if (this.SetProperties())
             {
                 this.filterService.ProcessFilters(this.Iteration, this.SiteDirectory.Domain);
             }
+        }
+
+        /// <summary>
+        /// Reads the source and target <see cref="EngineeringModel" /> iterations (as identified by the
+        /// <c>--source-model</c> and <c>--target-model</c> arguments) into the open <see cref="ISession" />.
+        /// </summary>
+        /// <returns>Assert whether both the source and target iterations were resolved and read.</returns>
+        public bool ReadSourceAndTargetModels()
+        {
+            if (string.IsNullOrWhiteSpace(this.commandArguments.SourceModel) || string.IsNullOrWhiteSpace(this.commandArguments.TargetModel))
+            {
+                Console.WriteLine("Both --source-model and --target-model must be specified for the SyncElementDefinitions action.");
+                return false;
+            }
+
+            this.SourceIteration = this.ReadModelIteration(this.commandArguments.SourceModel, out _);
+            this.TargetIteration = this.ReadModelIteration(this.commandArguments.TargetModel, out var targetDomain);
+            this.DomainOfExpertise = targetDomain;
+
+            return this.SourceIteration != null && this.TargetIteration != null;
+        }
+
+        /// <summary>
+        /// Resolves the active (non-frozen) <see cref="Iteration" /> of the <see cref="EngineeringModel" /> with the given
+        /// short name and reads it into the open <see cref="ISession" />.
+        /// </summary>
+        /// <param name="engineeringModelShortName">The short name of the <see cref="EngineeringModel" /> to read.</param>
+        /// <param name="activeDomain">The resolved active <see cref="DomainOfExpertise" /> used to read the iteration.</param>
+        /// <returns>The read <see cref="Iteration" />, or null when the model could not be resolved.</returns>
+        private Iteration ReadModelIteration(string engineeringModelShortName, out DomainOfExpertise activeDomain)
+        {
+            activeDomain = null;
+
+            var engineeringModelSetup = this.SiteDirectory.Model.SingleOrDefault(s => s.ShortName == engineeringModelShortName);
+
+            if (engineeringModelSetup == null)
+            {
+                Console.WriteLine($"No Engineering Model found with this name {engineeringModelShortName}");
+                return null;
+            }
+
+            var engineeringModelIid = engineeringModelSetup.EngineeringModelIid;
+            var iterationIid = engineeringModelSetup.IterationSetup.Single(s => s.FrozenOn == null).IterationIid;
+            var domainOfExpertiseIid = string.IsNullOrWhiteSpace(this.commandArguments.DomainOfExpertise)
+                ? engineeringModelSetup.ActiveDomain[0].Iid
+                : engineeringModelSetup.ActiveDomain.Single(s => s.UserFriendlyShortName == this.commandArguments.DomainOfExpertise).Iid;
+
+            var model = new EngineeringModel(engineeringModelIid, this.Session.Assembler.Cache, this.commandArguments.ServerUri);
+            var iteration = new Iteration(iterationIid, this.Session.Assembler.Cache, this.commandArguments.ServerUri) { Container = model };
+            activeDomain = new DomainOfExpertise(domainOfExpertiseIid, this.Session.Assembler.Cache, this.commandArguments.ServerUri);
+
+            this.Session.Read(iteration, activeDomain).GetAwaiter().GetResult();
+
+            return this.Session.OpenIterations.Keys.FirstOrDefault(openIteration => openIteration.Iid == iterationIid);
         }
 
         /// <summary>
