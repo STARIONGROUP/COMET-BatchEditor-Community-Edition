@@ -44,6 +44,7 @@ namespace CDPBatchEditor
         /// Main method that is the entry point for this BatchEditor
         /// </summary>
         /// <param name="args">The arguments</param>
+        [DynamicDependency(DynamicallyAccessedMemberTypes.PublicConstructors, typeof(Arguments))]
         public static void Main(string[] args)
         {
             try
